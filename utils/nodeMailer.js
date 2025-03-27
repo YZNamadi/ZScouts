@@ -1,4 +1,14 @@
+require('dotenv').config();
 const nodemailer = require('nodemailer');
+const mysql = require('mysql2/promise');
+
+// MySQL Connection
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+});
 
 const sendMail = async (options) => {
   try {
@@ -6,11 +16,10 @@ const sendMail = async (options) => {
       throw new Error('Recipient email is required.');
     }
 
-    // Create transporter
+    // Create the transporter using Gmail service
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587, // Use 465 for secure, 587 for TLS
-      secure: false, // Use `true` only if port 465
+      service: 'gmail',
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -20,25 +29,41 @@ const sendMail = async (options) => {
       },
     });
 
-    // Verify transporter connection
-    await transporter.verify();
-
-    // Email options
+    // Email details
     const mailOptions = {
-      from: `"Your App Name" <${process.env.EMAIL_USER}>`,
+      from: process.env.EMAIL_USER,
       to: options.email,
-      subject: options.subject,
-      text: options.text,
-      html: options.html,
+      subject: options.subject || 'No Subject',
+      text: options.text || '',
+      html: options.html || '',
     };
 
     // Send email
-    let info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${options.email}: ${info.response}`);
+
+    // Save email details to MySQL
+    const sql = `INSERT INTO emails (recipient, subject, message, status, sent_at) VALUES (?, ?, ?, ?, NOW())`;
+    await db.execute(sql, [
+      options.email,
+      options.subject || 'No Subject',
+      options.html || options.text || '',
+      'sent',
+    ]);
 
     return info;
   } catch (error) {
-    console.error('Error sending email:', error.message);
+    console.error(' Error sending email:', error.message);
+
+    // Log failed email to MySQL
+    const sql = `INSERT INTO emails (recipient, subject, message, status, sent_at) VALUES (?, ?, ?, ?, NOW())`;
+    await db.execute(sql, [
+      options.email || 'unknown',
+      options.subject || 'No Subject',
+      options.html || options.text || '',
+      'failed',
+    ]);
+
     throw error;
   }
 };
