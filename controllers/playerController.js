@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Player } = require('../models'); // Sequelize model for Players
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
@@ -22,7 +22,7 @@ const genToken = async (user) => {
       username: user.username,
       email: user.email,
       role: 'player'
-    }, process.env.JWT_SECRETE, { expiresIn: "50m" });
+    }, process.env.JWT_SECRET, { expiresIn: "50m" });
     return token;
   } catch (error) {
     console.error("Token generation error:", error.message);
@@ -48,7 +48,7 @@ const signUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltedRound);
 
     // Create a verification token
-    const token = await jwt.sign({ email }, process.env.JWT_SECRETE, { expiresIn: "50m" });
+    const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
     // Create the player record (role is set as 'player')
     const player = await Player.create({
@@ -85,7 +85,7 @@ const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
     // Verify the token
-    const { email } = jwt.verify(token, process.env.JWT_SECRETE);
+    const { email } = jwt.verify(token, process.env.JWT_SECRET);
     const player = await Player.findOne({ where: { email: email.toLowerCase() } });
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
@@ -176,7 +176,7 @@ const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password, existingPassword } = req.body;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRETE);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const playerId = decodedToken.playerId;
     const player = await Player.findByPk(playerId);
     if (!player) {

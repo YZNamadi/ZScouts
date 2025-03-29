@@ -1,108 +1,93 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('../database/sequelize');
-const Rating = require('./rating')
-
-class Player extends Model {}
-
-Player.init(
-  {
-    // Model attributes are defined here
+module.exports = (sequelize, DataTypes) => {
+  const Player = sequelize.define('Player', {
     id: {
-      allowNull: false,
-      primaryKey: true,
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false,
     },
     fullname: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: false,
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: false,
     },
+    // All fields below are optional
     phoneNumber: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     age: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     nationality: {
       type: DataTypes.STRING,
-      defaultValue: Nigerian
+      allowNull: true,
+      defaultValue: 'Nigerian',
     },
     currentTeam: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     pastTeams: {
       type: DataTypes.JSON,
-      allowNull:false
+      allowNull: true,
     },
     coachesWorkedWith: {
-      allowNull:false,
       type: DataTypes.JSON,
-      coachName:{
-        type: DataTypes.STRING
-      },
-      coachNumber:{
-        type: DataTypes.STRING
-      }
+      allowNull: true,
     },
     primaryPosition: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     secondaryPosition: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     dominantFoot: {
-      type:DataTypes.ENUM('left', 'right', 'both')
+      type: DataTypes.ENUM('left', 'right', 'both'),
+      allowNull: true,
     },
     strengths: {
-      type:DataTypes.STRING,
-      allowNull:false
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     weaknesses: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     media: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     averageRating: {
       type: DataTypes.DECIMAL,
-      allowNull:true,
-      defaultValue:0.0
+      allowNull: true,
+      defaultValue: 0.0,
     },
     totalRatingCount: {
       type: DataTypes.INTEGER,
-      defaultValue:0
+      allowNull: true,
+      defaultValue: 0,
     },
-    createdAt: {
-      allowNull: false,
-      type:DataTypes.DATE
+    
+    role: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
-    updatedAt: {
-      allowNull: false,
-      type:DataTypes.DATE
-    }
-  },
-  {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Player', // We need to choose the model name
-    tableName:'Players'
-  },
-);
-Player.belongsTo(Rating, { foreignKey: 'playerId' });
+  }, {
+    tableName: 'Players',
+    timestamps: true,
+  });
 
-module.exports = Player;
+  return Player;
+};

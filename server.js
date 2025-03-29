@@ -6,8 +6,8 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 // Import your onboarding routes for players and scouts
-// const playerRoutes = require('./routes/playerRoutes');
-// const scoutRoutes = require('./routes/scoutRoutes');
+const playerRoutes = require('./routes/playerRoutes');
+const scoutRoutes = require('./routes/scoutRoutes');
 
 const PORT = process.env.PORT;
 const app = express();
@@ -34,28 +34,31 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./routes/*.js'], // Path to your API docs in route files
+  apis: ['./routes/*.js'], 
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Use onboarding routes for players and scouts
-// app.use('/api/players', playerRoutes);
-// app.use('/api/scouts', scoutRoutes);
+app.use('/api/players', playerRoutes);
+app.use('/api/scouts', scoutRoutes);
 
 // Root route
 app.use('/', (req, res) => {
   res.send('ZScouts API is running!');
 });
 
-// Connect to the database using Sequelize
+// Connect to the database and synchronize tables
 const server = async () => {
   try {
     await sequelize.authenticate();
     console.log('Connected to database!');
+    // This will create or update tables based on your models
+    await sequelize.sync({ alter: true });
+    console.log("Database synchronized!");
   } catch (error) { 
-    console.error('Unable to connect to the database:', error.message);
+    console.error('Unable to connect or sync to the database:', error.message);
   }
 };
 

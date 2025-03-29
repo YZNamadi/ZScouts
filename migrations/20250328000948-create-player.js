@@ -30,7 +30,7 @@ module.exports = {
       },
       nationality: {
         type: Sequelize.STRING,
-        defaultValue: Nigerian
+        // defaultValue: Nigerian
       },
       currentTeam: {
         type: Sequelize.STRING,

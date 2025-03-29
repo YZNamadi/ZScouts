@@ -1,6 +1,6 @@
 require('dotenv').config();
-const scoutModel = require('../models/scoutModel'); // Ensure this model exists with fields like username, email, password, isVerified, etc.
-const bcrypt = require('bcrypt');
+const scoutModel = require('../models/scout'); 
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
@@ -22,7 +22,7 @@ const genToken = async (user) => {
       username: user.username,
       email: user.email,
       role: 'scout'
-    }, process.env.JWT_SECRETE, { expiresIn: "50m" });
+    }, process.env.JWT_SECRET, { expiresIn: "50m" });
     return token;
   } catch (error) {
     console.error("Token generation error:", error.message);
@@ -40,7 +40,7 @@ const signUp = async (req, res) => {
     }
     const saltedRound = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, saltedRound);
-    const token = await jwt.sign({ email }, process.env.JWT_SECRETE, { expiresIn: "50m" });
+    const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
     const scout = new scoutModel({
       username,
@@ -71,7 +71,7 @@ const signUp = async (req, res) => {
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
-    const { email } = jwt.verify(token, process.env.JWT_SECRETE);
+    const { email } = jwt.verify(token, process.env.JWT_SECRET);
     const scout = await scoutModel.findOne({ email: email.toLowerCase() });
     if (!scout) {
       return res.status(404).json({ message: "Scout not found" });
@@ -98,7 +98,7 @@ const resendVerificationEmail = async (req, res) => {
     if (scout.isVerified) {
       return res.status(400).json({ message: "Scout already verified" });
     }
-    const token = await jwt.sign({ email }, process.env.JWT_SECRETE, { expiresIn: "50m" });
+    const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
     const verificationLink = `${req.protocol}://${req.get("host")}/api/scouts/verify-email/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
@@ -142,7 +142,7 @@ const forgotPassword = async (req, res) => {
     if (!scout) {
       return res.status(404).json({ message: "Scout not found" });
     }
-    const resetToken = await jwt.sign({ scoutId: scout._id }, process.env.JWT_SECRETE, { expiresIn: "30m" });
+    const resetToken = await jwt.sign({ scoutId: scout._id }, process.env.JWT_SECRET, { expiresIn: "30m" });
     const resetLink = `${req.protocol}://${req.get("host")}/api/scouts/reset-password/${resetToken}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
@@ -162,7 +162,7 @@ const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password, existingPassword } = req.body;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRETE);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const scoutId = decodedToken.scoutId;
     const scout = await scoutModel.findById(scoutId);
     if (!scout) {

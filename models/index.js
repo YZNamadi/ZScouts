@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const process = require('process');
+require('dotenv').config();
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.js')[env];
@@ -27,15 +27,16 @@ fs
     );
   })
   .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    const modelFactory = require(path.join(__dirname, file));
+    const model = modelFactory(sequelize, Sequelize.DataTypes);
     db[model.name] = model;
   });
 
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+// Define associations here (if not defined in each model)
+db.Player.hasMany(db.Rating, { foreignKey: 'playerId', as: 'ratings' });
+db.Scout.hasMany(db.Rating, { foreignKey: 'scoutId', as: 'ratings' });
+db.Rating.belongsTo(db.Player, { foreignKey: 'playerId', as: 'player' });
+db.Rating.belongsTo(db.Scout, { foreignKey: 'scoutId', as: 'scout' });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

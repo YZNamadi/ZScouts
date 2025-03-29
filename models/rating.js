@@ -1,66 +1,47 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('../database/sequelize');
-const Player = require('./player');
-const Scout = require('./scout')
-
-class Rating extends Model {}
-
-Rating.init(
-  {
-    // Model attributes are defined here
+module.exports = (sequelize, DataTypes) => {
+  const Rating = sequelize.define('Rating', {
     id: {
-      allowNull: false,
-      primaryKey: true,
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false,
     },
     playerId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Players',
-        key: 'id'
+        model: 'Players', // Must match the Player table name
+        key: 'id',
       },
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE',
     },
     scoutId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Scouts',
-        key: 'id'
+        model: 'Scouts', // Must match the Scout table name
+        key: 'id',
       },
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE',
     },
     ratingScore: {
       type: DataTypes.DECIMAL,
-      allowNull:true,
-      validate:{
-        min:1.0,
-        max:5.0
+      allowNull: true,
+      validate: {
+        min: 1.0,
+        max: 5.0,
       },
     },
     comment: {
       type: DataTypes.STRING,
-      allowNull:true
+      allowNull: true,
     },
-    createdAt: {
-      allowNull: false,
-      type: DataTypes.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: DataTypes.DATE
-    }
-  },
-  {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Rating', // We need to choose the model name
-    tableName: 'Ratings'
-  },
-);
+  }, {
+    tableName: 'Ratings',
+    timestamps: true,
+  });
 
-module.exports = Rating;
+  return Rating;
+};

@@ -1,76 +1,63 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = ('../database/sequelize');
-const Rating = ('./rating');
-
-
-class Scout extends Model {}
-
-Scout.init(
-  {
-    // Model attributes are defined here
+module.exports = (sequelize, DataTypes) => {
+  const Scout = sequelize.define('Scout', {
     id: {
-      allowNull: false,
-      primaryKey: true,
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: true,
     },
     fullname: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: false,
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: false,
     },
+    // Optional fields:
     phoneNumber: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     clubORorganization: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     country: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     yearsOfExpereince: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     verificationDocument: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull: true,
     },
     bio: {
       type: DataTypes.STRING,
-      allowNull:true
+      allowNull: true,
     },
     isVerified: {
       type: DataTypes.BOOLEAN,
-      defaultValue:false
+      allowNull: true,
+      defaultValue: false,
     },
-    createdAt: {
-      allowNull: false,
-      type: DataTypes.DATE
+    // role field is required
+    role: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
-    updatedAt: {
-      allowNull: false,
-      type:DataTypes.DATE
-    }
-  },
-  {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Scout', // We need to choose the model name
-    tableName: 'Scouts'
-  },
-);
+  }, {
+    tableName: 'Scouts',
+    timestamps: true,
+  });
 
-Scout.hasMany(Rating, { foreignKey: 'id', as: 'Player' });
-
-module.exports = Scout;
+  return Scout;
+};

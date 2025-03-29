@@ -15,12 +15,12 @@ const playerAuthController = require("../controllers/playerController");
  *           schema:
  *             type: object
  *             required:
- *               - username
+ *               - fullname
  *               - email
  *               - password
  *               - role
  *             properties:
- *               username:
+ *               fullname:
  *                 type: string
  *               email:
  *                 type: string

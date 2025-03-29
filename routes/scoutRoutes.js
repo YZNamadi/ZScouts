@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const scoutAuthController = require("../controllers/scoutAuthController");
+const scoutAuthController = require("../controllers/scoutController");
 
 /**
  * @swagger
@@ -15,12 +15,12 @@ const scoutAuthController = require("../controllers/scoutAuthController");
  *           schema:
  *             type: object
  *             required:
- *               - username
+ *               - fullname
  *               - email
  *               - password
  *               - role
  *             properties:
- *               username:
+ *               fullname:
  *                 type: string
  *               email:
  *                 type: string
