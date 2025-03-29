@@ -5,21 +5,22 @@ class Transaction extends Model {}
 
 Transaction.init(
   {
+    email: {
+      type: DataTypes.STRING,
+      allowNull:false
+    },
     // Model attributes are defined here
     name: {
       type: DataTypes.STRING,
       allowNull:false
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull:false
-    },
-    reference: {
-      type: DataTypes.STRING,
-      allowNull:false
-    },
     amount:{
       type: DataTypes.INTEGER,
+      allowNull:false
+    },
+    
+    reference: {
+      type: DataTypes.STRING,
       allowNull:false
     },
     status: {

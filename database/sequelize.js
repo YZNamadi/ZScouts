@@ -12,4 +12,4 @@ const sequelize = new Sequelize(DB, username, password, {
     dialect: "mysql"
   });
 
-  module.exports = sequelize
+  module.exports = sequelize;
