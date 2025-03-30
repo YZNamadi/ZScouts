@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const passport = require("passport"); // Ensure Passport is imported
+const jwt = require("jsonwebtoken");
 const scoutAuthController = require("../controllers/scoutController");
 
 /**
@@ -170,5 +172,42 @@ router.post("/reset-password/:token", scoutAuthController.resetPassword);
  *         description: Scout signed out successfully.
  */
 router.post("/signout", scoutAuthController.signOut);
+
+/**
+ * @swagger
+ * /api/scouts/google-authenticate:
+ *   get:
+ *     summary: Initiate Google OAuth for scouts
+ *     tags: [Scouts]
+ *     responses:
+ *       302:
+ *         description: Redirect to Google for authentication.
+ */
+router.get('/google-authenticate', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+/**
+ * @swagger
+ * /api/scouts/auth/google/callback:
+ *   get:
+ *     summary: Google OAuth callback for scout login
+ *     tags: [Scouts]
+ *     responses:
+ *       200:
+ *         description: Scout logged in successfully using Google.
+ */
+router.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }), 
+  async (req, res) => {
+    try {
+      const token = jwt.sign({ userId: req.user.id, role: req.user.role }, process.env.JWT_SECRET, { expiresIn: "1day" });
+      res.status(200).json({
+        message: "Scout Google Sign In successful",
+        data: req.user,
+        token
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = router;

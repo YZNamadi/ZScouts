@@ -1,33 +1,28 @@
-'use strict';
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Ratings', {
+    await queryInterface.createTable('Scouts', {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
-      },
-      playerId: {
         type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4
+      },
+      fullname: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      scoutId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        
-      },
-      ratingScore: {
-        type: Sequelize.DECIMAL,
-        allowNull:true,
-        validate:{
-          min:1.0,
-          max:5.0
-        },
-      },
-      comment: {
+      email: {
         type: Sequelize.STRING,
-        allowNull:true
+        allowNull: false,
+        unique: true
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      role: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
@@ -39,7 +34,8 @@ module.exports = {
       }
     });
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Ratings');
+    await queryInterface.dropTable('Scouts');
   }
 };

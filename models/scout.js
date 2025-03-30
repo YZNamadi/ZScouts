@@ -20,35 +20,35 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     // Optional fields:
-    phoneNumber: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    clubORorganization: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    country: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    yearsOfExpereince: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    verificationDocument: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    bio: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-      defaultValue: false,
-    },
+    // phoneNumber: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+    // clubORorganization: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+    // country: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+    // yearsOfExpereince: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+    // verificationDocument: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+    // bio: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+    // isVerified: {
+    //   type: DataTypes.BOOLEAN,
+    //   allowNull: true,
+    //   defaultValue: false,
+    // },
     // role field is required
     role: {
       type: DataTypes.STRING,

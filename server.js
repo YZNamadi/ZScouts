@@ -25,7 +25,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'https://your-production-domain.com',
+        url: ' ',
         description: 'Production server',
       },
       {

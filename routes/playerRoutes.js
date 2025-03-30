@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const passport = require("passport"); 
+const jwt = require("jsonwebtoken");   
 const playerAuthController = require("../controllers/playerController");
 
+// Standard player auth routes
 /**
  * @swagger
  * /api/players/register:
@@ -170,5 +173,45 @@ router.post("/reset-password/:token", playerAuthController.resetPassword);
  *         description: Player signed out successfully.
  */
 router.post("/signout", playerAuthController.signOut);
+
+// Google OAuth Routes for Player Authentication
+
+/**
+ * @swagger
+ * /api/players/google-authenticate:
+ *   get:
+ *     summary: Authenticate using Google
+ *     tags: [Players]
+ *     responses:
+ *       302:
+ *         description: Redirect to Google for authentication.
+ */
+router.get('/google-authenticate', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+/**
+ * @swagger
+ * /api/players/auth/google/login:
+ *   get:
+ *     summary: Google OAuth callback for player login
+ *     tags: [Players]
+ *     responses:
+ *       200:
+ *         description: Player successfully logged in using Google.
+ */
+router.get('/auth/google/login', 
+  passport.authenticate('google', { failureRedirect: '/login' }), 
+  async (req, res) => {
+    // Here, req.user is set by Passport after successful authentication.
+    try {
+      const token = jwt.sign({ userId: req.user.id, isVerified: req.user.isVerified }, process.env.JWT_SECRET, { expiresIn: "1day" });
+      res.status(200).json({
+        message: "Login successful", 
+        data: req.user,
+        token
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = router;
