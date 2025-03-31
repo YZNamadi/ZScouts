@@ -5,9 +5,10 @@ const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-// Import your onboarding routes for players and scouts
+
 const playerRoutes = require('./routes/playerRoutes');
 const scoutRoutes = require('./routes/scoutRoutes');
+const transactionRoutes = require("./routes/transactionRoutes");
 
 const PORT = process.env.PORT;
 const app = express();
@@ -40,9 +41,10 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Use onboarding routes for players and scouts
+
 app.use('/api/players', playerRoutes);
 app.use('/api/scouts', scoutRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 // Root route
 app.use('/', (req, res) => {

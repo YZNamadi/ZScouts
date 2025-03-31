@@ -2,9 +2,19 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
 const jwt = require("jsonwebtoken");   
-const playerAuthController = require("../controllers/playerController");
+const {
+  signUp,
+  verifyEmail,
+  resendVerificationEmail,
+  signIn,
+  forgotPassword,
+  resetPassword,
+  signOut,
+  searchPlayers,
+} = require("../controllers/playerController");
 
 // Standard player auth routes
+
 /**
  * @swagger
  * /api/players/register:
@@ -36,7 +46,7 @@ const playerAuthController = require("../controllers/playerController");
  *       201:
  *         description: Player registered successfully and verification email sent.
  */
-router.post("/register", playerAuthController.signUp);
+router.post("/register", signUp);
 
 /**
  * @swagger
@@ -55,7 +65,7 @@ router.post("/register", playerAuthController.signUp);
  *       200:
  *         description: Player verified successfully.
  */
-router.get("/verify-email/:token", playerAuthController.verifyEmail);
+router.get("/verify-email/:token", verifyEmail);
 
 /**
  * @swagger
@@ -78,7 +88,7 @@ router.get("/verify-email/:token", playerAuthController.verifyEmail);
  *       200:
  *         description: Verification email sent successfully.
  */
-router.post("/resend-verification", playerAuthController.resendVerificationEmail);
+router.post("/resend-verification", resendVerificationEmail);
 
 /**
  * @swagger
@@ -104,7 +114,7 @@ router.post("/resend-verification", playerAuthController.resendVerificationEmail
  *       200:
  *         description: Player signed in successfully.
  */
-router.post("/login", playerAuthController.signIn);
+router.post("/login", signIn);
 
 /**
  * @swagger
@@ -127,7 +137,7 @@ router.post("/login", playerAuthController.signIn);
  *       200:
  *         description: Password reset email sent successfully.
  */
-router.post("/forgot-password", playerAuthController.forgotPassword);
+router.post("/forgot-password", forgotPassword);
 
 /**
  * @swagger
@@ -160,7 +170,7 @@ router.post("/forgot-password", playerAuthController.forgotPassword);
  *       200:
  *         description: Password reset successful.
  */
-router.post("/reset-password/:token", playerAuthController.resetPassword);
+router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
@@ -172,7 +182,7 @@ router.post("/reset-password/:token", playerAuthController.resetPassword);
  *       200:
  *         description: Player signed out successfully.
  */
-router.post("/signout", playerAuthController.signOut);
+router.post("/signout", signOut);
 
 // Google OAuth Routes for Player Authentication
 
@@ -201,17 +211,59 @@ router.get('/google-authenticate', passport.authenticate('google', { scope: ['pr
 router.get('/auth/google/login', 
   passport.authenticate('google', { failureRedirect: '/login' }), 
   async (req, res) => {
-    // Here, req.user is set by Passport after successful authentication.
     try {
-      const token = jwt.sign({ userId: req.user.id, isVerified: req.user.isVerified }, process.env.JWT_SECRET, { expiresIn: "1day" });
-      res.status(200).json({
-        message: "Login successful", 
-        data: req.user,
-        token
-      });
+      const token = jwt.sign(
+        { userId: req.user.id, isVerified: req.user.isVerified }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: "1day" }
+      );
+      res.status(200).json({ message: "Login successful", data: req.user, token });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
-});
+  }
+);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Player Discovery
+ *   description: Search and filter players based on specific criteria
+ */
+
+/**
+ * @swagger
+ * /api/v1/players/search:
+ *   get:
+ *     summary: Search for players based on filters
+ *     tags: [Player Discovery]
+ *     parameters:
+ *       - in: query
+ *         name: position
+ *         schema:
+ *           type: string
+ *         description: Filter players by primary position
+ *       - in: query
+ *         name: nationality
+ *         schema:
+ *           type: string
+ *         description: Filter players by nationality
+ *       - in: query
+ *         name: minRating
+ *         schema:
+ *           type: integer
+ *         description: Filter players by minimum average rating
+ *       - in: query
+ *         name: maxRating
+ *         schema:
+ *           type: integer
+ *         description: Filter players by maximum average rating
+ *     responses:
+ *       200:
+ *         description: List of players matching the filters
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/players/search", searchPlayers);
 
 module.exports = router;

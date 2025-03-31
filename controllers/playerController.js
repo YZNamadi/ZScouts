@@ -1,10 +1,10 @@
 require('dotenv').config();
-const { Player } = require('../models'); // Sequelize model for Players
+const { Player } = require('../models/player');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const emailTemplate= require("../utils/signup")
-
+const emailTemplate = require("../utils/signup");
+const { Op } = require("sequelize");
 
 // Create a nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -32,8 +32,6 @@ const genToken = (user) => {
 // Sign Up for Player
 const signUp = async (req, res) => {
   try {
-  
-
     const { fullname, email, password } = req.body;
 
     if (!fullname || !email || !password) {
@@ -53,7 +51,7 @@ const signUp = async (req, res) => {
 
     // Create player
     const player = await Player.create({
-      fullname, 
+      fullname,
       email: email.toLowerCase(),
       password: hashedPassword,
       role: 'player',
@@ -61,21 +59,21 @@ const signUp = async (req, res) => {
     });
 
     // Send verification email
-const verificationLink = `${req.protocol}://${req.get("host")}/api/scouts/verify-email/${token}`;
-const mailOptions = {
-  from: process.env.SENDER_EMAIL,
-  to: email,
-  subject: `Welcome ${newUser.username}, Kindly use this link to verify your email: ${verificationLink}`,
-  html: emailTemplate(verificationLink, newUser.username)
-};
+    const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: email,
+      subject: `Welcome ${fullname}, Kindly use this link to verify your email: ${verificationLink}`,
+      html: emailTemplate(verificationLink, fullname)
+    };
 
-await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
-res.status(201).json({
-  message: `Check your email: ${newUser.email} to verify your account.`,
-  data: player,
-  token
-});
+    res.status(201).json({
+      message: `Check your email: ${email} to verify your account.`,
+      data: player,
+      token
+    });
 
   } catch (error) {
     console.error("Signup Error:", error.message);
@@ -196,43 +194,72 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// Reset Password
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { password, existingPassword } = req.body;
+    const { newPassword } = req.body;
 
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const playerId = decodedToken.playerId;
+    // Verify token
+    const { playerId } = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Find player
     const player = await Player.findByPk(playerId);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
 
-    const isPasswordMatch = await bcrypt.compare(existingPassword, player.password);
-    if (!isPasswordMatch) {
-      return res.status(401).json({ message: "Existing password does not match" });
-    }
-
-    player.password = await bcrypt.hash(password, 10);
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    player.password = hashedPassword;
     await player.save();
 
-    res.status(200).json({ message: "Password reset successful" });
+    res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+// Search Players
+const searchPlayers = async (req, res) => {
+  try {
+    const { position, nationality, minRating, maxRating } = req.query;
+
+    let query = {};
+
+    if (position) {
+      query.primaryPosition = position;
+    }
+    if (nationality) {
+      query.nationality = nationality;
+    }
+    if (minRating || maxRating) {
+      query.averageRating = {};
+      if (minRating) query.averageRating[Op.gte] = parseFloat(minRating);
+      if (maxRating) query.averageRating[Op.lte] = parseFloat(maxRating);
+    }
+
+    const players = await Player.findAll({ where: query });
+
+    return res.status(200).json(players);
+  } catch (error) {
+    console.error("Error searching for players:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // Sign Out
 const revokedTokens = new Set();
 const signOut = (req, res) => {
-  const token = req.headers.authorization;
-  if (!token) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Invalid token" });
   }
 
+  const token = authHeader.split(" ")[1];
   revokedTokens.add(token);
+
   res.status(200).json({ message: "Player signed out successfully" });
 };
 
@@ -244,4 +271,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   signOut,
+  searchPlayers,
 };
