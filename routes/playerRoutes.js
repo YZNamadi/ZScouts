@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
-const jwt = require("jsonwebtoken");   
+const jwt = require("jsonwebtoken"); 
+const authenticate = require("../middlewares/authMiddleware").authenticate;  
 const {
   signUp,
   verifyEmail,
@@ -11,6 +12,7 @@ const {
   resetPassword,
   signOut,
   searchPlayers,
+  getPlayerContact
 } = require("../controllers/playerController");
 
 // Standard player auth routes
@@ -266,4 +268,56 @@ router.get('/auth/google/login',
  */
 router.get("/players/search", searchPlayers);
 
+/**
+ * @swagger
+ * /api/players/contact/{id}:
+ *   get:
+ *     summary: Retrieve player contact details
+ *     tags: [Player Discovery]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The player's ID
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Bearer token for authentication
+ *     responses:
+ *       200:
+ *         description: Player contact details retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Player contact details retrieved successfully."
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     fullName:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "johndoe@example.com"
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "1234567890"
+ *       403:
+ *         description: Payment required to view contact details.
+ *       404:
+ *         description: Player not found.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get("/contact/:id", authenticate, getPlayerContact);
+
 module.exports = router;
+

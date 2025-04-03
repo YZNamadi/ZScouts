@@ -71,7 +71,7 @@ const server = async () => {
     console.log('Connected to database!');
     // This will create or update tables based on your models
     await sequelize.sync({ alter: true });
-    // console.log("Database synchronized!");
+    console.log("Database synchronized!");
   } catch (error) { 
     console.error('Unable to connect or sync to the database:', error.message);
   }

@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config();
-const { Scout } = require('../models'); // Importing the instantiated model from index.js
+const { Scout } = require('../models'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -141,25 +141,32 @@ const resendVerificationEmail = async (req, res) => {
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const scout = await Scout.findOne({ where: { email: email.toLowerCase() } });
 
+    const scout = await Scout.findOne({ where: { email } });
     if (!scout) {
-      return res.status(404).json({ message: `Scout with email: ${email} not found.` });
-    } else if (!scout.isVerified) {
-      return res.status(400).json({ message: `Scout with email: ${email} is not verified.` });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const isPassword = await bcrypt.compare(password, scout.password);
-    if (!isPassword) {
-      return res.status(400).json({ message: 'Incorrect password' });
+    // Verify password
+    const isPasswordValid = await scout.verifyPassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = await genToken(scout);
-    res.status(200).json({ message: 'Scout Sign In successful', token });
+    // Generate token with user ID and role
+    const token = jwt.sign(
+      { userId: scout.id, role: "scout" }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({ message: "Login successful", token });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error logging in: " + error.message });
   }
 };
+
 
 // Scout Forgot Password
 const forgotPassword = async (req, res) => {

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const passport = require("passport"); // Ensure Passport is imported
+const passport = require("passport"); 
 const jwt = require("jsonwebtoken");
 const scoutAuthController = require("../controllers/scoutController");
 

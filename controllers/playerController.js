@@ -142,29 +142,33 @@ const resendVerificationEmail = async (req, res) => {
 };
 
 // Sign In
+
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const player = await Player.findOne({ where: { email: email.toLowerCase() } });
+    const player = await Player.findOne({ where: { email } });
     if (!player) {
-      return res.status(404).json({ message: `Player with email: ${email} not found.` });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    if (!player.isVerified) {
-      return res.status(400).json({ message: `Player with email: ${email} is not verified.` });
+    // Verify password (assuming you use bcrypt)
+    const isPasswordValid = await player.verifyPassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const isPassword = await bcrypt.compare(password, player.password);
-    if (!isPassword) {
-      return res.status(400).json({ message: "Incorrect password" });
-    }
+    // Generate token with user ID and role
+    const token = jwt.sign(
+      { userId: player.id, role: "player" }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: "1d" }
+    );
 
-    const token = genToken(player);
+    res.status(200).json({ message: "Login successful", token });
 
-    res.status(200).json({ message: "Player Sign In successful", token });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error logging in: " + error.message });
   }
 };
 
@@ -271,6 +275,47 @@ const signOut = (req, res) => {
   res.status(200).json({ message: "Player signed out successfully" });
 };
 
+const getPlayerContact = async (req, res) => {
+  try {
+    // Get player ID from route parameters
+    const { id: playerId } = req.params;
+    // Scout's email is expected to be available in req.user (set by your authentication middleware)
+    const scoutEmail = req.user.email;
+
+    // Find the player record by primary key
+    const player = await Player.findByPk(playerId);
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    // Check if the scout has a successful payment transaction
+    // This assumes that a transaction record exists with the scout's email and a status of 'successful'
+    const transaction = await Transaction.findOne({
+      where: {
+        email: scoutEmail,
+        status: "successful"
+      }
+    });
+
+    if (!transaction) {
+      return res.status(403).json({ message: "You must complete the payment to access player contact details." });
+    }
+
+    // Return player contact details (customize as needed)
+    return res.status(200).json({
+      message: "Player contact details retrieved successfully.",
+      data: {
+        fullName: player.fullName,
+        email: player.email,
+        phoneNumber: player.phoneNumber
+      }
+    });
+  } catch (error) {
+    console.error("Error retrieving player contact:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   signUp,
   verifyEmail,
@@ -280,4 +325,5 @@ module.exports = {
   resetPassword,
   signOut,
   searchPlayers,
+  getPlayerContact
 };
