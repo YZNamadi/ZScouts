@@ -1,0 +1,89 @@
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('PlayerKycs', {
+      id: {
+        allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4
+      },
+      age: {
+        type: Sequelize.STRING,
+        allowNull:false
+
+      },
+      nationality: {
+        type: Sequelize.STRING,
+        allowNull:false,
+        defaultValue:"Nigerian",
+
+      },
+      height: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      weight: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      preferredFoot: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      phoneNumber: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      homeAddress: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      primaryPosition: {
+        type: Sequelize.ENUM('GK','DEF','MF','ST')
+      },
+      secondaryPosition: {
+        type: Sequelize.STRING,
+        allowNull:true
+      },
+      currentClub: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      strengths: {
+        type: Sequelize.STRING,
+        allowNull:true
+      },
+      coachesWorkedWith: {
+        type: Sequelize.JSON,
+        allowNull:false
+      },
+      media: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      opentotrials: {
+        type: Sequelize.ENUM('YES','NO'),
+        allowNull:true
+      },
+      followDiet: {
+        type: Sequelize.ENUM('YES','NO'),
+        allowNull:true
+      },
+      willingToRelocate: {
+        type: Sequelize.ENUM('YES','NO'),
+        allowNull:false
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      }
+    });
+  },
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('PlayerKycs');
+  }
+};

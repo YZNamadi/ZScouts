@@ -12,7 +12,7 @@ exports.deletePlayerAccount = async (req, res) => {
 
     await player.destroy();
     return res.status(200).json({ message: "Player account deleted successfully" });
-  } catch (error) {
+  } catch (error) {n
     console.error("Error deleting player:", error);
     return res.status(500).json({ message: "Internal server error" });
   }

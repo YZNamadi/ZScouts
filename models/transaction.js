@@ -1,33 +1,40 @@
 module.exports = (sequelize, DataTypes) => {
-  const TransactionModel = sequelize.define('Transaction', {
+  const Transaction = sequelize.define('Transaction', {
+    id: {
+      allowNull: false,
+      primaryKey: true,
+      type: DataTypes.INTEGER,
+      defaultValue: DataTypes.UUIDV4
+    },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull:false
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull:false
     },
     amount: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull:false
+
     },
     reference: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull:false
     },
     status: {
-      type: DataTypes.ENUM('pending', 'successful', 'failed'),
-      defaultValue: 'pending',
+      type: DataTypes.ENUM('pending','success','failed'),
+      allowNull:false,
+      defaultValue:'pending'
     },
     paymentDate: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull:false
     },
   }, {
     tableName: 'Transactions',
     timestamps: true,
-  });
-
-  return TransactionModel;
+  })
+  return Transaction;
 };
