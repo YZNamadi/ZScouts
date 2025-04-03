@@ -21,7 +21,8 @@ const genToken = async (user) => {
   try {
     return await jwt.sign(
       {
-        userId: user.id, // Sequelize uses id
+        userId: user.id, 
+        scoutId: user.scoutId, // Sequelize uses id
         fullname: user.fullname,
         email: user.email,
         role: 'scout',

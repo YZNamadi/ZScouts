@@ -1,36 +1,35 @@
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../utils/cloudinary"); 
+const multer = require('multer');
 
-// Configure Cloudinary storage
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "ZScouts", 
-        allowed_formats: ["jpg", "jpeg", "png", "gif", "mp4", "mov", "avi"],
-        resource_type: "auto", // Automatically detect if the file is an image or video
+const storage = multer.diskStorage({
+    destination: (req, file, cb)=>{
+        cb(null, './uploads')
     },
+    filename:(req, file, cb)=>{
+        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9)
+        const ext = file.mimetype.split('/')[1]
+        cb(null, `${file.fieldname}_${uniqueSuffix}.${ext}`)
+    }
 });
 
-// File filter to allow only images and videos
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
-        cb(null, true);
-    } else {
-        cb(new Error("Invalid file format. Only images and videos are allowed."), false);
+const fileFilter = (req, file, cb)=>{
+    //Allow Images an documents
+    if(file.mimetype.startsWith('image/') || file.mimetype.startsWith('application/') || file.mimetype.startsWith
+('video/')){
+        cb(null, true)
+    } else{
+        cb(new Error('Invalid file format: Only images, videos, and documents are allowed.'));
+
     }
 };
 
-// File upload limits (5MB per file)
 const limits = {
-    fileSize: 1024 * 1024 * 5, 
+    fileSize: 1024 * 1024 * 10
 };
 
-// Set up multer with Cloudinary storage
 const upload = multer({
     storage,
     fileFilter,
-    limits,
+    limits
 });
 
 module.exports = upload;

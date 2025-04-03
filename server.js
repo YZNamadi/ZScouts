@@ -5,16 +5,23 @@ const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-
 const playerRoutes = require('./routes/playerRoutes');
 const scoutRoutes = require('./routes/scoutRoutes');
 const transactionRoutes = require("./routes/transactionRoutes");
+const scoutKycRoutes = require("./routes/scoutKycRouter");
+const playerKycRoutes = require("./routes/playerKycRoutes");
 
 const PORT = process.env.PORT;
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+
+app.use('/api/players', playerRoutes);
+app.use('/api/scouts', scoutRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/v1",playerKycRoutes);
+app.use("/api/v1",scoutKycRoutes);
 
 const swaggerOptions = {
   definition: {
@@ -42,14 +49,20 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
-app.use('/api/players', playerRoutes);
-app.use('/api/scouts', scoutRoutes);
-app.use("/api/transactions", transactionRoutes);
+
 
 // Root route
 app.use('/', (req, res) => {
   res.send('ZScouts API is running!');
 });
+
+app.use((error, req, res, next) => {
+  if(error){
+     return res.status(400).json({message:  error.message})
+  }
+  next()
+})
+
 
 // Connect to the database and synchronize tables
 const server = async () => {

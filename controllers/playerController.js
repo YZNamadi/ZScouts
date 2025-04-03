@@ -20,6 +20,7 @@ const genToken = (user) => {
   return jwt.sign(
     {
       userId: user.id,
+      scoutId: user.scoutId,
       fullname: user.fullname,
       email: user.email,
       role: 'player'
