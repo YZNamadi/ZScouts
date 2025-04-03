@@ -162,9 +162,9 @@ router.post("/forgot-password", forgotPassword);
  *               - password
  *               - existingPassword
  *             properties:
- *               password:
+ *               newPassword:
  *                 type: string
- *               existingPassword:
+ *               confirmPassword:
  *                 type: string
  *     responses:
  *       200:

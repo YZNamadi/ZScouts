@@ -74,8 +74,7 @@ const signUp = async (req, res) => {
 
     res.status(201).json({
       message: `Check your email: ${email} to verify your account.`,
-      data: player,
-      token
+      data: player
     });
 
   } catch (error) {
@@ -104,7 +103,7 @@ const verifyEmail = async (req, res) => {
     player.isVerified = true;
     await player.save();
 
-    res.status(200).json({ message: "Player verified successfully", data: player });
+    res.status(200).json({ message: "Player verified successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -200,7 +199,7 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { newPassword } = req.body;
+    const { newPassword, confirmPassword} = req.body;
 
     // Verify token
     const { playerId } = jwt.verify(token, process.env.JWT_SECRET);
@@ -210,6 +209,12 @@ const resetPassword = async (req, res) => {
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        message: 'Password does not match'
+      })
+    };
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
