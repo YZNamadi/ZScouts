@@ -1,5 +1,7 @@
+'use strict';
+
 require('dotenv').config();
-const { Player } = require('../models/player');
+const { Player } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
