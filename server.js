@@ -33,7 +33,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: ' ',
+        url: 'https://zscouts.onrender.com',
         description: 'Production server',
       },
       {
