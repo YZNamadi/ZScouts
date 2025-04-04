@@ -39,11 +39,12 @@ module.exports = {
         allowNull:false
       },
       primaryPosition: {
-        type: Sequelize.ENUM('GK','DEF','MF','ST')
+        type: Sequelize.ENUM('GK','DEF','MF','ST'),
+        allowNull:false
       },
       secondaryPosition: {
         type: Sequelize.STRING,
-        allowNull:true
+        allowNull:false
       },
       currentClub: {
         type: Sequelize.STRING,
@@ -51,7 +52,7 @@ module.exports = {
       },
       strengths: {
         type: Sequelize.STRING,
-        allowNull:true
+        allowNull:false
       },
       coachesWorkedWith: {
         type: Sequelize.JSON,
@@ -63,11 +64,11 @@ module.exports = {
       },
       opentotrials: {
         type: Sequelize.ENUM('YES','NO'),
-        allowNull:true
+        allowNull:false
       },
       followDiet: {
         type: Sequelize.ENUM('YES','NO'),
-        allowNull:true
+        allowNull:false
       },
       willingToRelocate: {
         type: Sequelize.ENUM('YES','NO'),

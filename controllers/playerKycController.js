@@ -1,6 +1,9 @@
-const Player = require('../models/player');
-const playerKyc = require('../models/playerkyc');
+'use strict';
+
+const {Player} = require('../models');
+const {PlayerKyc} = require('../models');
 const cloudinary = require('../config/cloudinary');
+const fs = require('fs')
 
 
 exports.playerInfo = async(req, res)=>{
@@ -8,11 +11,11 @@ exports.playerInfo = async(req, res)=>{
        const {id:playerId} = req.params
         const {age,nationality,height,weight,preferredFoot,playingPosition,
             phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,coachesWorkedWith,openToTrails, followDiet,willingToRelocate} = req.body
+            strengths,coachesWorkedWith,openToTrials, followDiet,willingToRelocate} = req.body
 
             if (!req.file) {
                 return res.status(400).json({
-                    message: "Verification document required"
+                    message: "Please upload a short vidoe showing your skills"
                 });
             };
 
@@ -44,22 +47,30 @@ exports.playerInfo = async(req, res)=>{
                     coachNumber:"+2349057",
                     coachEmail: "johndoe@gmail.com"
                 }
-            ],openToTrails,media:result.secure_url,followDiet,willingToRelocate
+            ],openToTrials,media:result.secure_url,followDiet,willingToRelocate,playerId
         });
-    const playerDetails = await playerKyc.create(data);
+        if (!player.profileCompletion) {  
+            player.profileCompletion = true
+             
+        }
+        await player.save() 
+        
+    const playerDetails = await PlayerKyc.create(data);
             res.status(201).json({
                 message: "KYC completed successfully",
                 data: playerDetails
             })
     } catch (error) {
         console.log(error.message)
-        if (req.file.path) {
-            // Unlink the file from our local storage
-            fs.unlinkSync(req.file.path)
-        }
+           if (req.file.path) {
+                    // Unlink the file from our local storage
+                    fs.unlinkSync(req.file.path)
+                }
         res.status(500).json({
 
             message:"Unable to complete KYC" + error.message
         })
     }
 };
+
+
