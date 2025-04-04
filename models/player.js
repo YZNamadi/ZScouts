@@ -28,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    profileCompletion:{
+      type: DataTypes.BOOLEAN,
+      defaultValue:false,
+    },
   }, {
     tableName: 'Players',
     timestamps: true,

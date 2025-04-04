@@ -38,11 +38,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     primaryPosition: {
-      type: DataTypes.ENUM('GK','DEF','MF','ST')
+      type: DataTypes.ENUM('GK','DEF','MF','ST'),
+      allowNull:false
     },
     secondaryPosition: {
       type: DataTypes.STRING,
-      allowNull:true
+      allowNull:false
     },
     currentClub: {
       type: DataTypes.STRING,
@@ -50,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     strengths: {
       type: DataTypes.STRING,
-      allowNull:true
+      allowNull:false
     },
     coachesWorkedWith: {
       type: DataTypes.JSON,
@@ -62,11 +63,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     openToTrials: {
       type: DataTypes.ENUM('YES','NO'),
-      allowNull:true
+      allowNull:false
     },
     followDiet: {
       type: DataTypes.ENUM('YES','NO'),
-      allowNull:true
+      allowNull:false
     },
     willingToRelocate: {
       type: DataTypes.ENUM('YES','NO'),
