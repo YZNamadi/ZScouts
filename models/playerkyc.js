@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     coachesWorkedWith: {
-      type: DataTypes.JSON,
+      type: DataTypes.STRING,
       allowNull:false
     },
     media: {

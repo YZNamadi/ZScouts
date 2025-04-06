@@ -55,7 +55,7 @@ module.exports = {
         allowNull:false
       },
       coachesWorkedWith: {
-        type: Sequelize.JSON,
+        type: Sequelize.STRING,
         allowNull:false
       },
       media: {

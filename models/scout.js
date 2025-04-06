@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+
 module.exports = (sequelize, DataTypes) => {
   const Scout = sequelize.define('Scout', {
     id: {
@@ -19,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    
     role: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -28,14 +29,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    profileCompletion:{
+    profileCompletion: {
       type: DataTypes.BOOLEAN,
-      defaultValue:false,
+      defaultValue: false,
     },
   }, {
     tableName: 'Scouts',
     timestamps: true,
   });
+
+  //  Password comparison method
+  Scout.prototype.verifyPassword = function (password) {
+    return bcrypt.compare(password, this.password);
+  };
 
   return Scout;
 };
