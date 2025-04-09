@@ -23,11 +23,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     profileCompletion:{
       type: DataTypes.BOOLEAN,
       defaultValue:false,

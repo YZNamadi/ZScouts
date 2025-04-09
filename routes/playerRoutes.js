@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
 const jwt = require("jsonwebtoken"); 
+const {registerValidation} = require("../middlewares/validation")
 const authenticate = require("../middlewares/authMiddleware").authenticate;  
 const {
   signUp,
@@ -33,7 +34,6 @@ const {
  *               - fullname
  *               - email
  *               - password
- *               - role
  *             properties:
  *               fullname:
  *                 type: string
@@ -41,14 +41,11 @@ const {
  *                 type: string
  *               password:
  *                 type: string
- *               role:
- *                 type: string
- *                 description: Must be "player"
  *     responses:
  *       201:
  *         description: Player registered successfully and verification email sent.
  */
-router.post("/register", signUp);
+router.post("/register", registerValidation,signUp);
 
 /**
  * @swagger
