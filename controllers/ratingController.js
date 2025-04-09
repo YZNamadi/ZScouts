@@ -1,17 +1,27 @@
-const Rating = require("../models/rating");
-const Player = require("../models/player");
+const {Rating} = require("../models");
+const {Player} = require("../models");
 
+const findPlayer = async (playerId) => {
+  const player = await Player.findByPk(playerId);
+  if (!player) throw new Error("Player not found");
+  return player;
+};
 
 exports.ratePlayer = async (req, res) => {
   try {
     const { id: playerId } = req.params;
     const { ratingScore, comment } = req.body;
-    const scoutId = req.user.id; // Assume scout is authenticated
+    const scoutId = req.user.id;
+
+    // Ensure ratingScore is an integer
+    const rating = parseInt(ratingScore, 10);
 
     // Validate if player exists
-    const player = await Player.findByPk(playerId);
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
+    const player = await findPlayer(playerId); 
+
+    // Rating score validation
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating score must be between 1 and 5" });
     }
 
     // Prevent duplicate ratings
@@ -21,7 +31,7 @@ exports.ratePlayer = async (req, res) => {
     }
 
     // Save rating
-    await Rating.create({ playerId, scoutId, ratingScore, comment });
+    await Rating.create({ playerId, scoutId, ratingScore: rating, comment });
 
     // Update player's average rating
     const allRatings = await Rating.findAll({ where: { playerId } });
@@ -33,30 +43,7 @@ exports.ratePlayer = async (req, res) => {
 
     return res.status(201).json({ message: "Rating submitted successfully" });
   } catch (error) {
-    console.error("Error rating player:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-
-exports.commentOnPlayer = async (req, res) => {
-  try {
-    const { id: playerId } = req.params;
-    const { comment } = req.body;
-    const scoutId = req.user.id; // Assume scout is authenticated
-
-    // Validate if player exists
-    const player = await Player.findByPk(playerId);
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
-    }
-
-    // Save comment
-    await Rating.create({ playerId, scoutId, comment });
-
-    return res.status(201).json({ message: "Comment added successfully" });
-  } catch (error) {
-    console.error("Error adding comment:", error);
+    console.error("Error while rating player:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

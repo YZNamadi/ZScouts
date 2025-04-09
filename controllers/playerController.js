@@ -141,36 +141,59 @@ const resendVerificationEmail = async (req, res) => {
   }
 };
 
-// Sign In
 
+// Sign In
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const player = await Player.findOne({ where: { email } });
+    // Validate request body
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Find player by email (ensure lowercase match)
+    const player = await Player.findOne({ where: { email: email.toLowerCase() } });
     if (!player) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Verify password (assuming you use bcrypt)
-    const isPasswordValid = await player.verifyPassword(password);
+    // Compare hashed password
+    const isPasswordValid = await bcrypt.compare(password, player.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate token with user ID and role
+    // Generate JWT token
     const token = jwt.sign(
-      { userId: player.id, role: "player" }, 
-      process.env.JWT_SECRET, 
+      {
+        userId: player.id,
+        fullname: player.fullname,
+        email: player.email,
+        role: "player"
+      },
+      process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    // Respond with token and user details
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      data: {
+        id: player.id,
+        fullname: player.fullname,
+        email: player.email,
+        role: "player"
+      }
+    });
 
   } catch (error) {
+    console.error("Player SignIn Error:", error.message);
     res.status(500).json({ message: "Error logging in: " + error.message });
   }
 };
+
 
 // Forgot Password
 const forgotPassword = async (req, res) => {
@@ -261,18 +284,24 @@ const searchPlayers = async (req, res) => {
 };
 
 // Sign Out
+
 const revokedTokens = new Set();
-const signOut = (req, res) => {
-  const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Invalid token" });
+const signOut = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    revokedTokens.add(token); // Add the token to the blacklist
+
+    res.status(200).json({ message: "Player signed out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  const token = authHeader.split(" ")[1];
-  revokedTokens.add(token);
-
-  res.status(200).json({ message: "Player signed out successfully" });
 };
 
 const getPlayerContact = async (req, res) => {

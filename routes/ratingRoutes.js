@@ -1,6 +1,6 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const ratingController = require("../controllers/ratingController");
+const ratingController = require('../controllers/ratingController');
 
 /**
  * @swagger
@@ -45,7 +45,7 @@ const ratingController = require("../controllers/ratingController");
  *       500:
  *         description: Internal server error
  */
-router.post("/players/:id/rate", ratingController.ratePlayer);
+router.post('/players/:id/rate', ratingController.ratePlayer);
 
 /**
  * @swagger
@@ -78,6 +78,6 @@ router.post("/players/:id/rate", ratingController.ratePlayer);
  *       500:
  *         description: Internal server error
  */
-router.post("/players/:id/comment", ratingController.commentOnPlayer);
+router.post('/players/:id/comment', ratingController.commentOnPlayer);
 
 module.exports = router;

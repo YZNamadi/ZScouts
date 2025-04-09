@@ -11,6 +11,7 @@ const transactionRoutes = require("./routes/transactionRoutes");
 const scoutKycRoutes = require("./routes/scoutKycRouter");
 const playerKycRoutes = require("./routes/playerKycRoutes");
 
+
 const PORT = process.env.PORT;
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/scouts', scoutRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/v1",playerKycRoutes);
 app.use("/api/v1",scoutKycRoutes);
+
 
 const swaggerOptions = {
   definition: {

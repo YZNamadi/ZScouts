@@ -137,38 +137,60 @@ const resendVerificationEmail = async (req, res) => {
   }
 };
 
-// Scout Sign In
+// Sign In
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const scout = await Scout.findOne({ where: { email } });
+    // Check if both fields are provided
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Find scout by email
+    const scout = await Scout.findOne({ where: { email: email.toLowerCase() } });
     if (!scout) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Verify password
-    const isPasswordValid = await scout.verifyPassword(password);
+    // Compare password with hashed password
+    const isPasswordValid = await bcrypt.compare(password, scout.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate token with user ID and role
+    // Generate JWT token
     const token = jwt.sign(
-      { userId: scout.id, role: "scout" }, 
-      process.env.JWT_SECRET, 
+      {
+        userId: scout.id,
+        fullname: scout.fullname,
+        email: scout.email,
+        role: "scout"
+      },
+      process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    // Return token and scout data
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      data: {
+        id: scout.id,
+        fullname: scout.fullname,
+        email: scout.email,
+        role: "scout"
+      }
+    });
 
   } catch (error) {
+    console.error("Scout SignIn Error:", error.message);
     res.status(500).json({ message: "Error logging in: " + error.message });
   }
 };
 
 
-// Scout Forgot Password
+// Forgot Pass
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -194,7 +216,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// Scout Reset Password
+//Reset Pass
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
@@ -217,13 +239,26 @@ const resetPassword = async (req, res) => {
 };
 
 // Scout Sign Out
+
+const revokedTokens = new Set();
+
 const signOut = async (req, res) => {
   try {
-    res.status(200).json({ message: 'Scout signed out successfully' });
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    revokedTokens.add(token); // Add the token to the blacklist
+
+    res.status(200).json({ message: "Scout signed out successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 module.exports = {
   signUp,
