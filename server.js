@@ -8,6 +8,7 @@ const swaggerUi = require('swagger-ui-express');
 const playerRoutes = require('./routes/playerRoutes');
 const scoutRoutes = require('./routes/scoutRoutes');
 const transactionRoutes = require("./routes/transactionRoutes");
+
 const scoutKycRoutes = require("./routes/scoutKycRouter");
 const playerKycRoutes = require("./routes/playerKycRoutes");
 

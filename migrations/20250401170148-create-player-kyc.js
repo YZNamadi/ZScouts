@@ -54,7 +54,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull:false
       },
-      coachesWorkedWith: {
+      contactInfoOfCoaches: {
         type: Sequelize.STRING,
         allowNull:false
       },

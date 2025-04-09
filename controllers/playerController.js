@@ -24,8 +24,7 @@ const genToken = (user) => {
       userId: user.id,
       scoutId: user.scoutId,
       fullname: user.fullname,
-      email: user.email,
-      role: 'player'
+      email: user.email
     },
     process.env.JWT_SECRET,
     { expiresIn: "50m" }
@@ -35,12 +34,14 @@ const genToken = (user) => {
 // Sign Up for Player
 const signUp = async (req, res) => {
   try {
-    const { fullname, email, password } = req.body;
+    const { fullname, email, password, confirmPassword } = req.body;
 
-    if (!fullname || !email || !password) {
+    if (!fullname || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "fullname, email, and password are required." });
     }
-
+    if(password !== confirmPassword){
+      return res.status(400).json({message: "password does not match"})
+    }
     const existingPlayer = await Player.findOne({ where: { email: email.toLowerCase() } });
     if (existingPlayer) {
       return res.status(400).json({ message: `Player with this email: ${email} already exists.` });
@@ -57,7 +58,6 @@ const signUp = async (req, res) => {
       fullname,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: 'player',
       isVerified: false
     });
 
@@ -130,7 +130,7 @@ const resendVerificationEmail = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: player.email,
       subject: "Resend Player Verification",
-      html: `Please click on the link to verify your email: <a href="${verificationLink}">Verify Email</a>`
+      html: emailTemplate(verificationLink, fullname)
     };
 
     await transporter.sendMail(mailOptions);

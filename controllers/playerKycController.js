@@ -11,7 +11,7 @@ exports.playerInfo = async(req, res)=>{
        const {id:playerId} = req.params
         const {age,nationality,height,weight,preferredFoot,playingPosition,
             phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,coachesWorkedWith,openToTrials, followDiet,willingToRelocate} = req.body
+            strengths,contactInfoOfCoaches,openToTrials, followDiet,willingToRelocate} = req.body
 
             if (!req.file) {
                 return res.status(400).json({
@@ -41,13 +41,7 @@ exports.playerInfo = async(req, res)=>{
         const data =({
             age,nationality,height,weight,preferredFoot,playingPosition,
             phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,coachesWorkedWith:coachesWorkedWith || [
-                {
-                    coachName: "john doe",
-                    coachNumber:"+2349057",
-                    coachEmail: "johndoe@gmail.com"
-                }
-            ],openToTrials,media:result.secure_url,followDiet,willingToRelocate,playerId
+            strengths,contactInfoOfCoaches,openToTrials,media:result.secure_url,followDiet,willingToRelocate,playerId
         });
         if (!player.profileCompletion) {  
             player.profileCompletion = true

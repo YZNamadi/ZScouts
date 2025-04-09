@@ -24,8 +24,7 @@ const genToken = async (user) => {
         userId: user.id, 
         scoutId: user.scoutId, // Sequelize uses id
         fullname: user.fullname,
-        email: user.email,
-        role: 'scout',
+        email: user.email
       },
       process.env.JWT_SECRET,
       { expiresIn: '50m' }
@@ -39,7 +38,14 @@ const genToken = async (user) => {
 // Scout Sign Up
 const signUp = async (req, res) => {
   try {
-    const { fullname, email, password } = req.body;
+    const { fullname, email, password, confirmPassword  } = req.body;
+
+    if (!fullname || !email || !password || !confirmPassword) {
+      return res.status(400).json({ message: "fullname, email, and password are required." });
+    }
+    if(password !== confirmPassword){
+      return res.status(400).json({message: "password does not match"})
+    }
     // Use where clause in findOne:
     const existingScout = await Scout.findOne({ where: { email: email.toLowerCase() } });
 
@@ -55,7 +61,6 @@ const signUp = async (req, res) => {
       fullname,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: 'scout',
       isVerified: false,
     });
 

@@ -20,10 +20,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      role: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
