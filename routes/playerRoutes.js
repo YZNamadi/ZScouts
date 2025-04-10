@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
 const jwt = require("jsonwebtoken"); 
-const {registerValidation} = require("../middlewares/validation")
+const {registerValidation, forgetPasswords, loginValidation,resetPasswordValidation} = require("../middlewares/validation")
 const authenticate = require("../middlewares/authMiddleware").authenticate;  
 const {
   signUp,
@@ -113,7 +113,7 @@ router.post("/resend-verification", resendVerificationEmail);
  *       200:
  *         description: Player signed in successfully.
  */
-router.post("/login", signIn);
+router.post("/login", loginValidation, signIn);
 
 /**
  * @swagger
@@ -136,7 +136,7 @@ router.post("/login", signIn);
  *       200:
  *         description: Password reset email sent successfully.
  */
-router.post("/forgot-password", forgotPassword);
+router.post("/forgot-password", forgetPasswords, forgotPassword);
 
 /**
  * @swagger
@@ -169,7 +169,7 @@ router.post("/forgot-password", forgotPassword);
  *       200:
  *         description: Password reset successful.
  */
-router.post("/reset-password/:token", resetPassword);
+router.post("/reset-password/:token",resetPasswordValidation, resetPassword);
 
 /**
  * @swagger

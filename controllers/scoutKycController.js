@@ -157,9 +157,7 @@ exports.deleteScoutInfo = async(req, res) => {
             });
         }
 
-        const scoutKyc = await ScoutKyc.findOne({
-            where: { scoutId }
-        });
+        const scoutKyc = await ScoutKyc.findOne({where:{ scoutId }});
 
         if (!scoutKyc) {
             return res.status(404).json({

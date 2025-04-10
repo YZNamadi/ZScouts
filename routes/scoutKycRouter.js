@@ -1,6 +1,6 @@
 
 const scoutAuthController = require('../controllers/scoutController');
-const { scoutInfo } = require('../controllers/scoutKycController');
+const { scoutInfo, deleteScoutInfo } = require('../controllers/scoutKycController');
 const upload = require('../utils/multer');
 
 const router = require('express').Router();
@@ -89,6 +89,6 @@ const router = require('express').Router();
 router.post('/scoutkyc/:id', upload.single('verificationDocument'), scoutInfo);
 
 
-
+router.delete('/scoutkyc/:id/:imageId', deleteScoutInfo)
 
 module.exports = router

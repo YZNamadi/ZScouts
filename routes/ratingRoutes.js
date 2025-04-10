@@ -48,4 +48,6 @@ const { authenticate } = require('../middlewares/authMiddleware'); // Import the
  */
 router.post('/players/:id/rate', authenticate, ratePlayer);
 
+router.delete('/players/:id/imageId', )
+
 module.exports = router;
