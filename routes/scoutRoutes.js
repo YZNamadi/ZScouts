@@ -165,6 +165,8 @@ router.post("/reset-password/:token", scoutAuthController.resetPassword);
  *   post:
  *     summary: Scout sign out
  *     tags: [Scouts]
+ *     security:
+ *       - bearerAuth: []  # This requires the Authorization header with the token
  *     responses:
  *       200:
  *         description: Scout signed out successfully.

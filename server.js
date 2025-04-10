@@ -11,7 +11,7 @@ const transactionRoutes = require("./routes/transactionRoutes");
 
 const scoutKycRoutes = require("./routes/scoutKycRouter");
 const playerKycRoutes = require("./routes/playerKycRoutes");
-
+const ratingRoutes = require('./routes/ratingRoutes'); 
 
 const PORT = process.env.PORT;
 const app = express();
@@ -24,7 +24,7 @@ app.use('/api/scouts', scoutRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/v1",playerKycRoutes);
 app.use("/api/v1",scoutKycRoutes);
-
+app.use('/api', ratingRoutes);
 
 const swaggerOptions = {
   definition: {
@@ -42,6 +42,21 @@ const swaggerOptions = {
       {
         url: 'http://localhost:1990',
         description: 'Development server',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'Authorization',
+          description: 'Provide the token in the format: Bearer {your_token}',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
       },
     ],
   },

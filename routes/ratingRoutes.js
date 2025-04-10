@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const ratingController = require('../controllers/ratingController');
+const { ratePlayer } = require('../controllers/ratingController'); // Ensure this path is correct
+const { authenticate } = require('../middlewares/authMiddleware'); // Import the authenticate middleware
 
 /**
  * @swagger
@@ -45,39 +46,6 @@ const ratingController = require('../controllers/ratingController');
  *       500:
  *         description: Internal server error
  */
-router.post('/players/:id/rate', ratingController.ratePlayer);
-
-/**
- * @swagger
- * /api/players/{id}/comment:
- *   post:
- *     summary: Add a comment to a player's video
- *     tags: [Rating & Review]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Player ID to comment on
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               comment:
- *                 type: string
- *                 description: Comment text
- *     responses:
- *       201:
- *         description: Comment added successfully
- *       404:
- *         description: Player not found
- *       500:
- *         description: Internal server error
- */
-router.post('/players/:id/comment', ratingController.commentOnPlayer);
+router.post('/players/:id/rate', authenticate, ratePlayer);
 
 module.exports = router;

@@ -177,11 +177,14 @@ router.post("/reset-password/:token", resetPassword);
  *   post:
  *     summary: Player sign out
  *     tags: [Players]
+ *     security:
+ *       - bearerAuth: []  # This requires the Authorization header with the token
  *     responses:
  *       200:
  *         description: Player signed out successfully.
  */
 router.post("/signout", signOut);
+
 
 // Google OAuth Routes for Player Authentication
 
