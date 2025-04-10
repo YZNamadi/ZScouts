@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
 const jwt = require("jsonwebtoken");
-const {registerValidation, forgetPasswords} = require("../middlewares/validation")
+const {registerValidation, forgetPasswords, loginValidation, resetPasswordValidation} = require("../middlewares/validation")
 const scoutAuthController = require("../controllers/scoutController");
 
 /**
@@ -101,7 +101,7 @@ router.post("/resend-verification", scoutAuthController.resendVerificationEmail)
  *       200:
  *         description: Scout signed in successfully.
  */
-router.post("/login", scoutAuthController.signIn);
+router.post("/login",loginValidation, scoutAuthController.signIn);
 
 /**
  * @swagger
@@ -157,7 +157,7 @@ router.post("/forgot-password", forgetPasswords, scoutAuthController.forgotPassw
  *       200:
  *         description: Password reset successful.
  */
-router.post("/reset-password/:token", scoutAuthController.resetPassword);
+router.post("/reset-password/:token",resetPasswordValidation, scoutAuthController.resetPassword);
 
 /**
  * @swagger
