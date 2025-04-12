@@ -37,6 +37,12 @@ db.Player.hasMany(db.Rating, { foreignKey: 'playerId', as: 'ratings' });
 db.Scout.hasMany(db.Rating, { foreignKey: 'scoutId', as: 'ratings' });
 db.Rating.belongsTo(db.Player, { foreignKey: 'playerId', as: 'player' });
 db.Rating.belongsTo(db.Scout, { foreignKey: 'scoutId', as: 'scout' });
+db.Player.hasOne(db.PlayerKyc, { foreignKey: 'playerId', as: 'playerKyc' });
+db.PlayerKyc.belongsTo(db.Player, { foreignKey: 'playerId', as: 'player' });
+db.Scout.hasOne(db.ScoutKyc, { foreignKey: 'scoutId', as: 'scoutKyc' });
+db.ScoutKyc.belongsTo(db.Scout, { foreignKey: 'scoutId', as: 'scout' });
+
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

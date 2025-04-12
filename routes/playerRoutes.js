@@ -34,12 +34,15 @@ const {
  *               - fullname
  *               - email
  *               - password
+ *               - confirmPassword
  *             properties:
  *               fullname:
  *                 type: string
  *               email:
  *                 type: string
  *               password:
+ *                 type: string
+ *               confirmPassword:
  *                 type: string
  *     responses:
  *       201:

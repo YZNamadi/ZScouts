@@ -7,6 +7,10 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
       },
+      playerId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+      },
       age: {
         type: Sequelize.STRING,
         allowNull:false

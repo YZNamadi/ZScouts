@@ -1,6 +1,6 @@
 
 const scoutAuthController = require('../controllers/scoutController');
-const { scoutInfo, deleteScoutInfo } = require('../controllers/scoutKycController');
+const { scoutInfo, deleteScoutInfo, updateScoutInfo } = require('../controllers/scoutKycController');
 const upload = require('../utils/multer');
 
 const router = require('express').Router();
@@ -15,7 +15,7 @@ const router = require('express').Router();
 
 /**
  * @swagger
- * /api/scoutkyc/{id}:
+ * /api/v1/scoutkyc/{id}:
  *   post:
  *     summary: Submit scout KYC information
  *     tags: [Scout KYC]
@@ -29,7 +29,7 @@ const router = require('express').Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -88,7 +88,114 @@ const router = require('express').Router();
 
 router.post('/scoutkyc/:id', upload.single('verificationDocument'), scoutInfo);
 
+/**
+ * @swagger
+ * /api/v1/scouts/{id}:
+ *   put:
+ *     summary: Update scout KYC information
+ *     tags: [Scout KYC]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the scout to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nationality:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               clubName:
+ *                 type: string
+ *               scoutingRole:
+ *                 type: string
+ *               league:
+ *                 type: string
+ *               preferredPosition:
+ *                 type: string
+ *               preferredAge:
+ *                 type: string
+ *               socialMediaProfile:
+ *                 type: string
+ *               verificationDocument:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional document for scout verification
+ *     responses:
+ *       200:
+ *         description: Scout profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout profile updated successfully
+ *                 data:
+ *                   type: object
+ *                   description: Updated scout KYC data
+ *       400:
+ *         description: Error uploading document or invalid input
+ *       404:
+ *         description: Scout or profile not found
+ *       500:
+ *         description: Internal server error while updating profile
+ */
+router.put('/scouts/:id', upload.single('verificationDocument'),updateScoutInfo);
 
-router.delete('/scoutkyc/:id/:imageId', deleteScoutInfo)
+/**
+ * @swagger
+ * /api/v1/scoutkyc/{id}:
+ *   delete:
+ *     summary: Delete scout KYC profile
+ *     tags: [Scout KYC]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the scout whose KYC profile is to be deleted
+ *     responses:
+ *       200:
+ *         description: Scout profile deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout profile deleted successfully
+ *       404:
+ *         description: Scout or scout profile not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout not found
+ *       500:
+ *         description: Internal server error while deleting scout profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unable to delete scout profile: [error message]
+ */
+router.delete('/scoutkyc/:id/', deleteScoutInfo);
 
 module.exports = router

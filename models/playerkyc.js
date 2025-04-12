@@ -6,6 +6,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
+    playerId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Players',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
     age: {
       type: DataTypes.STRING,
       allowNull:false
