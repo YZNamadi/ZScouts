@@ -5,60 +5,77 @@ const {ScoutKyc }= require('../models');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs')
 
-exports.scoutInfo = async(req, res)=>{
+exports.scoutInfo = async(req, res) => {
     try {
-
         const {id: scoutId} = req.params;
-        const {nationality, phoneNumber,clubName,scoutingRole,league,preferredPosition,
-            preferredAge,socialMediaProfile} = req.body
+        const {nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
+            preferredAge, socialMediaProfile} = req.body;
 
-            // Check if file exists
         if (!req.file) {
             return res.status(400).json({
                 message: "Verification document required"
             });
-        };
+        }
 
         const scout = await Scout.findByPk(scoutId);
-        if(!scout){
-            fs.unlinkSync(req.file.path)
+        if (!scout) {
+            fs.unlinkSync(req.file.path);
             return res.status(404).json({
-                message:"Scout not found"
-            })
+                message: "Scout not found"
+            });
+        }
+        
+        const existingKyc = await ScoutKyc.findOne({where:{scoutId}});
+        if (existingKyc || scout.profileCompletion) {
+            fs.unlinkSync(req.file.path);
+            return res.status(400).json({
+                message: "Scout KYC already captured"
+            });
+        }
+        let result;
+        try {
+            result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
+            fs.unlinkSync(req.file.path);
+        } catch (uploadError) {
+            fs.unlinkSync(req.file.path);
+            return res.status(400).json({
+                message: "Error uploading document: " + uploadError.message
+            });
+        }
+
+        const data = {
+            nationality, 
+            phoneNumber, 
+            verificationDocument: result.secure_url,
+            clubName,
+            scoutingRole,
+            league,
+            preferredPosition,
+            preferredAge,
+            socialMediaProfile,
+            scoutId
         };
-         const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' }, (error, data) => {
-                    if (error) {
-                        return res.status(400).json({
-                            message: error.message
-                        })
-                    } else {
-                        return data
-                    }
-                });
-                fs.unlinkSync(req.file.path);
+        const scoutDetails = await ScoutKyc.create(data);
+        
+        scout.profileCompletion = true;
+        await scout.save();
 
-
-        const data = ({
-            nationality, phoneNumber, verificationDocument:result.secure_url,clubName,scoutingRole,league,preferredPosition,
-            preferredAge,socialMediaProfile,scoutId
+        return res.status(201).json({
+            message: "KYC completed successfully",
+            data: scoutDetails
         });
-        if (!scout.profileCompletion) {  
-            scout.profileCompletion = true
-        }
-        await scout.save() 
-    const scoutDetails = await ScoutKyc.create(data);
-            res.status(201).json({
-                message: "KYC completed successfully",
-                data: scoutDetails
-            })
     } catch (error) {
-        if (req.file.path) {
-            // Unlink the file from our local storage
-            fs.unlinkSync(req.file.path)
+        if (req.file && req.file.path) {
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (unlinkError) {
+                console.log("Error cleaning up file:", unlinkError.message);
+            }
         }
-        res.status(500).json({
-            message:"Unable to complete KYC" + error.message
-        })
+        
+        return res.status(500).json({
+            message: "Unable to complete KYC: " + error.message
+        });
     }
 };
 
@@ -70,7 +87,6 @@ exports.updateScoutInfo = async(req, res) => {
             nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
             preferredAge, socialMediaProfile} = req.body;
 
-    
         const scout = await Scout.findByPk(scoutId);
         if (!scout) {
             if (req.file && req.file.path) {
@@ -107,12 +123,20 @@ exports.updateScoutInfo = async(req, res) => {
         // If file is uploaded, process it and update the verification document
         if (req.file) {
             try {
+                // First, delete the existing document from Cloudinary if it exists
+                const existingDocumentUrl = existingScoutKyc.verificationDocument;
+                if (existingDocumentUrl) {
+     const fileExtension = existingDocumentUrl.split('.').pop();
+ const resourceType = fileExtension === 'video/' || fileExtension === 'application/' || fileExtension === 'image/' 
+                    const publicId = existingDocumentUrl.split('/').pop().split('.')[0];
+                    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+                }
+
+                // Upload the new document
                 const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
-                
-            
                 updateData.verificationDocument = result.secure_url;
                 
-            
+                // Clean up local file
                 fs.unlinkSync(req.file.path);
             } catch (uploadError) {
                 if (req.file && req.file.path) {
@@ -123,6 +147,7 @@ exports.updateScoutInfo = async(req, res) => {
                 });
             }
         }
+        
         await existingScoutKyc.update(updateData);
 
         res.status(200).json({
@@ -148,7 +173,7 @@ exports.updateScoutInfo = async(req, res) => {
 
 exports.deleteScoutInfo = async(req, res) => {
     try {
-        const { id: scoutId } = req.params;
+        const { id:scoutId} = req.params;
 
         const scout = await Scout.findByPk(scoutId);
         if (!scout) {
@@ -164,18 +189,15 @@ exports.deleteScoutInfo = async(req, res) => {
                 message: "Scout profile not found"
             });
         }
-
         const documentUrl = scoutKyc.verificationDocument;
-        await scoutKyc.destroy();
-
         if (documentUrl) {
-            try {
-                const publicId = documentUrl.split('/').pop().split('.')[0];
-                await cloudinary.uploader.destroy(publicId);
-            } catch (cloudinaryError) {
-                console.log("Error deleting document from Cloudinary:", cloudinaryError.message)
-            }
+            const fileExtension = documentUrl.split('.').pop();
+
+ const resourceType = fileExtension === 'video/' || fileExtension === 'application/' || fileExtension === 'image/';
+ const publicId = documentUrl.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
         }
+        await scoutKyc.destroy();
 
         res.status(200).json({
             message: "Scout profile deleted successfully"

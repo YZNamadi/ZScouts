@@ -21,13 +21,15 @@ const scoutAuthController = require("../controllers/scoutController");
  *               - fullname
  *               - email
  *               - password
- *               - role
+ *               - confirmPassword
  *             properties:
  *               fullname:
  *                 type: string
  *               email:
  *                 type: string
  *               password:
+ *                 type: string
+ *               confirmPassword:
  *                 type: string
  *     responses:
  *       201:
