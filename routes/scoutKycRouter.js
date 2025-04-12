@@ -15,7 +15,7 @@ const router = require('express').Router();
 
 /**
  * @swagger
- * /api/scoutkyc/{id}:
+ * /api/v1/scoutkyc/{id}:
  *   post:
  *     summary: Submit scout KYC information
  *     tags: [Scout KYC]
@@ -29,7 +29,7 @@ const router = require('express').Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:

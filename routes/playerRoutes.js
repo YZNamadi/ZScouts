@@ -41,6 +41,8 @@ const {
  *                 type: string
  *               password:
  *                 type: string
+ *               confirmPassword:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Player registered successfully and verification email sent.
