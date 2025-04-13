@@ -8,10 +8,15 @@ const DB_PASS = process.env.DATABASE_PASSWORD;
 const DB_HOST = process.env.DATABASE_HOST;
 const DB_PORT = process.env.DATABASE_PORT;
 
+
+console.log("HOST:", process.env.DATABASE_HOST);
+console.log("USER:", process.env.DATABASE_USERNAME);
+console.log("PASS:", process.env.DATABASE_PASSWORD);
+
 // Create a new Sequelize instance using the environment variables
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   host: DB_HOST,
-  port: Number(DB_PORT), // Ensure port is a number
+  port: Number(DB_PORT), 
   dialect: 'mysql',
   logging: false,
 });
