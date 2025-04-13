@@ -70,9 +70,9 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // Root route
-// app.use('/', (req, res) => {
-//   res.send('ZScouts API is running!');
-// });
+app.use('/', (req, res) => {
+  res.send('ZScouts API is running!');
+});
 
 app.use((error, req, res, next) => {
   if(error){

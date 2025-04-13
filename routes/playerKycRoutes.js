@@ -252,7 +252,7 @@ router.put('/players/:id', upload.single('media'),updatePlayerInfo);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unable to delete player profile: [error details]
+ *                   example: "Unable to delete player profile: [error details]"
  */
 router.delete('/playerskyc/:id/', deletePlayerInfo);
 

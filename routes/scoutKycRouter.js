@@ -194,7 +194,7 @@ router.put('/scouts/:id', upload.single('verificationDocument'),updateScoutInfo)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unable to delete scout profile: [error message]
+ *                   example: "Unable to delete scout profile: [error message]"
  */
 router.delete('/scoutkyc/:id/', deleteScoutInfo);
 
