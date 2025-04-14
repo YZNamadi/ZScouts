@@ -17,7 +17,25 @@ const PORT = process.env.PORT;
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+
+// ✅ CORS configuration
+const whitelist = [
+  'http://localhost:1990', 
+  'https://zscouts.onrender.com'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 
 // Routes
 app.use('/api/players', playerRoutes);
@@ -63,7 +81,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./routes/*.js'], // Swagger will read annotations from all route files
+  apis: ['./routes/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
