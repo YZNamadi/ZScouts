@@ -1,5 +1,7 @@
-const Player = require("../models/player");
-const Scout = require("../models/scout");
+'use strict';
+
+const {Player} = require("../models");
+const {Scout} = require("../models");
 
 
 exports.deletePlayerAccount = async (req, res) => {
@@ -12,7 +14,7 @@ exports.deletePlayerAccount = async (req, res) => {
 
     await player.destroy();
     return res.status(200).json({ message: "Player account deleted successfully" });
-  } catch (error) {n
+  } catch (error) {
     console.error("Error deleting player:", error);
     return res.status(500).json({ message: "Internal server error" });
   }

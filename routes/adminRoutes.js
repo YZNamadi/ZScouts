@@ -11,7 +11,7 @@ const adminController = require("../controllers/adminController");
 
 /**
  * @swagger
- * /api/admin/players/{id}:
+ * /players/{id}:
  *   delete:
  *     summary: Delete a player account
  *     tags: [Admin]
@@ -34,7 +34,7 @@ router.delete("/players/:id", adminController.deletePlayerAccount);
 
 /**
  * @swagger
- * /api/admin/scouts/{id}:
+ * /scouts/{id}:
  *   delete:
  *     summary: Delete a scout account
  *     tags: [Admin]
@@ -57,7 +57,7 @@ router.delete("/scouts/:id", adminController.deleteScoutAccount);
 
 /**
  * @swagger
- * /api/admin/scouts/{id}/verify:
+ * /scouts/{id}/verify:
  *   patch:
  *     summary: Verify a scout
  *     tags: [Admin]
@@ -80,7 +80,7 @@ router.patch("/scouts/:id/verify", adminController.verifyScout);
 
 /**
  * @swagger
- * /api/admin/players/{id}/makeAdmin:
+ * /players/{id}/makeAdmin:
  *   patch:
  *     summary: Promote a player to admin
  *     tags: [Admin]
