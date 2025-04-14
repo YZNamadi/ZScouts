@@ -319,7 +319,7 @@ const getPlayerContact = async (req, res) => {
 
     // Check if the scout has a successful payment transaction
     // This assumes that a transaction record exists with the scout's email and a status of 'successful'
-    const transaction = await Transaction.findOne({
+    const transaction = await transaction.findOne({
       where: {
         email: scoutEmail,
         status: "successful"
