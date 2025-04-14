@@ -1,3 +1,4 @@
+'use strict';
 const { Rating, Player } = require('../models');
 
 // Helper function to find a player by ID
