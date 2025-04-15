@@ -21,7 +21,8 @@ app.use(express.json());
 // ✅ CORS configuration
 const whitelist = [
   'http://localhost:1990', 
-  'https://zscouts.onrender.com'
+  'https://zscouts.onrender.com',
+  'https://z-scouts.vercel.app',
 ];
 
 const corsOptions = {
