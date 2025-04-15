@@ -18,33 +18,8 @@ const app = express();
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-});
 
-
-// ✅ CORS configuration
-const whitelist = [
-  'http://localhost:1990', 
-  'https://zscouts.onrender.com',
-  'https://z-scoutsf.vercel.app',
-];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Routes
 app.use('/api/players', playerRoutes);
