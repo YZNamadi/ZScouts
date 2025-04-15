@@ -1,24 +1,28 @@
 'use strict';
 require('dotenv').config();
-const { Transaction } = require('../models'); 
+const { Transaction } = require('../models');
 const axios = require('axios');
-const formattedDate = new Date().toLocaleString();
+
+// Use a proper Date object (not a string)
+const getFormattedDate = () => new Date();
 
 exports.initializePayment = async (req, res) => {
   try {
     const { email, name, amount } = req.body;
+
     if (!email || !name || !amount) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    const reference = `TCA-AF-${Date.now()}`;
     const paymentData = {
       amount,
       customer: {
         name,
-        email
+        email,
       },
       currency: "NGN",
-      reference: `TCA-AF-${Date.now()}`,
+      reference,
     };
 
     const response = await axios.post(
@@ -26,39 +30,40 @@ exports.initializePayment = async (req, res) => {
       paymentData,
       {
         headers: {
-          Authorization: `Bearer ${process.env.KORA_SECRET_KEY}`
-        }
+          Authorization: `Bearer ${process.env.KORA_SECRET_KEY}`,
+        },
       }
     );
 
     const { data } = response?.data;
 
-    // FIXED: Using Sequelize's create() instead of new Transaction()
+    // Save to Sequelize database
     const payment = await Transaction.create({
       email,
       name,
       amount,
-      reference: paymentData.reference,
-      paymentDate: formattedDate
+      reference,
+      paymentDate: getFormattedDate().toLocaleString()
+
     });
 
     res.status(200).json({
       message: "Payment initialized successfully",
       data: {
         reference: data?.reference,
-        checkout_url: data?.checkout_url
-      }
+        checkout_url: data?.checkout_url,
+      },
     });
-
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 exports.verifyPayment = async (req, res) => {
   try {
     const { reference } = req.query;
+
     if (!reference) {
       return res.status(400).json({ message: "Reference is required" });
     }
@@ -67,14 +72,13 @@ exports.verifyPayment = async (req, res) => {
       `https://api.korapay.com/merchant/api/v1/charges/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.KORA_SECRET_KEY}`
-        }
+          Authorization: `Bearer ${process.env.KORA_SECRET_KEY}`,
+        },
       }
     );
 
     const { data } = response?.data;
 
-    // FIXED: Using Sequelize's findOne() with where condition
     const payment = await Transaction.findOne({ where: { reference } });
 
     if (!payment) {
@@ -86,16 +90,16 @@ exports.verifyPayment = async (req, res) => {
       await payment.save();
       return res.status(200).json({
         message: "Payment Verified Successfully",
-        data: payment
+        data: payment,
       });
     } else {
       return res.status(400).json({
         message: "Payment Verification Failed",
-        data: payment
+        data: payment,
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
