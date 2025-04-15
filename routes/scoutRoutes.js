@@ -163,15 +163,44 @@ router.post("/reset-password/:token",resetPasswordValidation, scoutAuthControlle
 
 /**
  * @swagger
- * /api/scouts/signout:
+ * /api/players/sign-out:
  *   post:
- *     summary: Scout sign out
- *     tags: [Scouts]
+ *     summary: Sign out the scout/player
+ *     tags: [Players]
+ *     description: Signs out a scout by invalidating the token via blacklisting.
  *     security:
- *       - bearerAuth: []  # This requires the Authorization header with the token
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Scout signed out successfully.
+ *         description: Scout signed out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout signed out successfully
+ *       401:
+ *         description: No token provided or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No token provided
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  */
 router.post("/signout", scoutAuthController.signOut);
 

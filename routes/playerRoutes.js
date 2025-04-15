@@ -162,7 +162,7 @@ router.post("/forgot-password", forgetPasswords, forgotPassword);
  *             type: object
  *             required:
  *               - password
- *               - existingPassword
+ *               - confirmPassword
  *             properties:
  *               newPassword:
  *                 type: string
@@ -174,18 +174,49 @@ router.post("/forgot-password", forgetPasswords, forgotPassword);
  */
 router.post("/reset-password/:token",resetPasswordValidation, resetPassword);
 
-/**
+
+ /**
  * @swagger
- * /api/players/signout:
+ * /api/players/sign-out:
  *   post:
- *     summary: Player sign out
+ *     summary: Sign out the player
  *     tags: [Players]
+ *     description: Signs out a player by blacklisting their token.
  *     security:
- *       - bearerAuth: []  # This requires the Authorization header with the token
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Player signed out successfully.
+ *         description: Player signed out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player signed out successfully
+ *       401:
+ *         description: No token provided or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No token provided
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  */
+
 router.post("/signout", signOut);
 
 
