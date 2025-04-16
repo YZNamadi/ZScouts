@@ -5,7 +5,8 @@ const { Player } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const emailTemplate = require("../utils/signup");
+const { reset } = require("../utils/resetPassword");
+const { verify } = require("../utils/verifyEmail");
 const { Op } = require("sequelize");
 
 // Create a nodemailer transporter
@@ -54,15 +55,16 @@ const signUp = async (req, res) => {
       fullname,
       email: email.toLowerCase(),
       password: hashedPassword,
+      confirmPassword,
       isVerified: false
     });
 
-    const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
+    const link = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: `Welcome ${fullname}, Kindly use this link to verify your email: ${verificationLink}`,
-      html: emailTemplate(verificationLink, fullname)
+      subject: `Welcome ${fullname}, Kindly use this link to verify your email: ${link}`,
+      html: verify(fullname, link)
     };
 
     await transporter.sendMail(mailOptions);
@@ -193,12 +195,12 @@ const forgotPassword = async (req, res) => {
 
     const resetToken = jwt.sign({ playerId: player.id }, process.env.JWT_SECRET, { expiresIn: "30m" });
 
-    const resetLink = `${req.protocol}://${req.get("host")}/api/players/reset-password/${resetToken}`;
+    const link = `${req.protocol}://${req.get("host")}/api/players/reset-password/${resetToken}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
       subject: "Player Password Reset",
-      html: `Please click on the link to reset your password: <a href="${resetLink}">Reset Password</a>`
+      html: reset `Please click on the link to reset your password: <a href="${link}">Reset Password</a>`
     };
 
     await transporter.sendMail(mailOptions);

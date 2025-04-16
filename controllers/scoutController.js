@@ -61,6 +61,7 @@ const signUp = async (req, res) => {
       fullname,
       email: email.toLowerCase(),
       password: hashedPassword,
+      confirmPassword,
       isVerified: false,
     });
 
