@@ -157,3 +157,43 @@ exports.resetPasswordValidation = (req, res, next) =>{
 
     next();
 }
+
+// Change Password Validation
+exports.changePasswordValidation = (req, res, next) => {
+    const schema = Joi.object({
+        currentPassword: Joi.string()
+            .required()
+            .messages({
+                'any.required': 'Current password is required',
+                'string.empty': 'Current password cannot be empty'
+            }),
+
+        newPassword: Joi.string()
+            .pattern(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+            .trim()
+            .required()
+            .messages({
+                'string.pattern.base': 'New password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character',
+                'any.required': 'New password is required',
+                'string.empty': 'New password cannot be empty'
+            }),
+
+        confirmPassword: Joi.string()
+            .valid(Joi.ref('newPassword'))
+            .required()
+            .messages({
+                'any.only': 'Passwords do not match',
+                'any.required': 'Confirm password is required'
+            })
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};

@@ -47,13 +47,9 @@ const signUp = async (req, res) => {
       return res.status(400).json({ message: `Player with this email: ${email} already exists.` });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Generate token
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
-    // Create player
     const player = await Player.create({
       fullname,
       email: email.toLowerCase(),
@@ -61,7 +57,6 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    // Send verification email
     const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
@@ -87,8 +82,6 @@ const signUp = async (req, res) => {
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
-
-    // Verify the token
     const { email } = jwt.verify(token, process.env.JWT_SECRET);
 
     const player = await Player.findOne({ where: { email: email.toLowerCase() } });
@@ -141,30 +134,25 @@ const resendVerificationEmail = async (req, res) => {
   }
 };
 
-
 // Sign In
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate request body
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Find player by email (ensure lowercase match)
     const player = await Player.findOne({ where: { email: email.toLowerCase() } });
     if (!player) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Compare hashed password
     const isPasswordValid = await bcrypt.compare(password, player.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       {
         userId: player.id,
@@ -176,7 +164,6 @@ const signIn = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // Respond with token and user details
     res.status(200).json({
       message: "Login successful",
       token,
@@ -193,7 +180,6 @@ const signIn = async (req, res) => {
     res.status(500).json({ message: "Error logging in: " + error.message });
   }
 };
-
 
 // Forgot Password
 const forgotPassword = async (req, res) => {
@@ -228,22 +214,17 @@ const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword, confirmPassword} = req.body;
 
-    // Verify token
     const { playerId } = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find player
     const player = await Player.findByPk(playerId);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
 
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({
-        message: 'Password does not match'
-      })
-    };
+      return res.status(400).json({ message: 'Password does not match' });
+    }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     player.password = hashedPassword;
     await player.save();
@@ -254,6 +235,31 @@ const resetPassword = async (req, res) => {
   }
 };
 
+//  Change Password
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const playerId = req.user.userId;
+
+    const player = await Player.findByPk(playerId);
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, player.password);
+    if (!isPasswordMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    player.password = hashedPassword;
+    await player.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Search Players
 const searchPlayers = async (req, res) => {
@@ -284,7 +290,6 @@ const searchPlayers = async (req, res) => {
 };
 
 // Sign Out
-
 const revokedTokens = new Set();
 
 const signOut = async (req, res) => {
@@ -296,7 +301,7 @@ const signOut = async (req, res) => {
     }
 
     const token = authHeader.split(" ")[1];
-    revokedTokens.add(token); // Add the token to the blacklist
+    revokedTokens.add(token);
 
     res.status(200).json({ message: "Player signed out successfully" });
   } catch (error) {
@@ -306,19 +311,14 @@ const signOut = async (req, res) => {
 
 const getPlayerContact = async (req, res) => {
   try {
-    // Get player ID from route parameters
     const { id: playerId } = req.params;
-    // Scout's email is expected to be available in req.user (set by your authentication middleware)
     const scoutEmail = req.user.email;
 
-    // Find the player record by primary key
     const player = await Player.findByPk(playerId);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
 
-    // Check if the scout has a successful payment transaction
-    // This assumes that a transaction record exists with the scout's email and a status of 'successful'
     const transaction = await transaction.findOne({
       where: {
         email: scoutEmail,
@@ -330,7 +330,6 @@ const getPlayerContact = async (req, res) => {
       return res.status(403).json({ message: "You must complete the payment to access player contact details." });
     }
 
-    // Return player contact details (customize as needed)
     return res.status(200).json({
       message: "Player contact details retrieved successfully.",
       data: {
@@ -352,6 +351,7 @@ module.exports = {
   signIn,
   forgotPassword,
   resetPassword,
+  changePassword,
   signOut,
   searchPlayers,
   getPlayerContact

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
 const jwt = require("jsonwebtoken"); 
-const {registerValidation, forgetPasswords, loginValidation,resetPasswordValidation} = require("../middlewares/validation")
+const {registerValidation, forgetPasswords, loginValidation,changePasswordValidation,resetPasswordValidation} = require("../middlewares/validation")
 const authenticate = require("../middlewares/authMiddleware").authenticate;  
 const {
   signUp,
@@ -11,6 +11,7 @@ const {
   signIn,
   forgotPassword,
   resetPassword,
+  changePassword,
   signOut,
   searchPlayers,
   getPlayerContact
@@ -174,6 +175,42 @@ router.post("/forgot-password", forgetPasswords, forgotPassword);
  */
 router.post("/reset-password/:token",resetPasswordValidation, resetPassword);
 
+
+
+/**
+ * @swagger
+ * /api/players/change-password:
+ *   post:
+ *     summary: Change player password
+ *     tags: [Players]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *               - confirmPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully.
+ *       400:
+ *         description: Invalid input or current password is incorrect.
+ *       401:
+ *         description: Unauthorized.
+ */
+router.post("/change-password", authenticate, changePasswordValidation, changePassword);
 
  /**
  * @swagger
