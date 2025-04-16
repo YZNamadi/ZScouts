@@ -9,7 +9,7 @@ exports.scoutInfo = async(req, res) => {
     try {
         const {id: scoutId} = req.params;
         const {nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
-            preferredAge, socialMediaProfile} = req.body;
+            age, socialMediaProfile} = req.body;
 
         if (!req.file) {
             return res.status(400).json({
@@ -51,7 +51,7 @@ exports.scoutInfo = async(req, res) => {
             scoutingRole,
             league,
             preferredPosition,
-            preferredAge,
+            age,
             socialMediaProfile,
             scoutId
         };

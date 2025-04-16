@@ -17,7 +17,7 @@ exports.registerValidation = (req, res, next) => {
 
         email: Joi.string()
             .email()
-            .pattern(/^[a-z0-9](\.?[a-z0-9]){5,}@(gmail|yahoo)\.com$/)
+            .pattern(/^[a-z0-9](\.?[a-z0-9]){5,}@[a-z0-9-]+\.[a-z]{2,}$/)
             .required()
             .messages({
                 'string.email': 'Invalid email format',
@@ -99,7 +99,6 @@ exports.loginValidation = (req, res, next) => {
             .trim()
             .required()
             .messages({
-                'string.pattern.base': 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character [!@#$%^&*]',
                 'any.required': 'Password is required',
                 'string.empty': 'Password cannot be empty'
             }),

@@ -1,10 +1,11 @@
 'use strict';
 
 require('dotenv').config();
-const { Scout } = require('../models'); 
+const { Scout, ScoutKyc } = require('../models'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+
 
 // Create a nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -64,7 +65,7 @@ const signUp = async (req, res) => {
       isVerified: false,
     });
 
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
@@ -303,6 +304,34 @@ const signOut = async (req, res) => {
   }
 };
 
+const getScout = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    const findScout = await Scout.findOne({
+      where: { id },
+      include: [{ model: ScoutKyc, as: 'scoutKyc' }]
+    });
+    
+    if(!findScout){
+      res.status(400).json({
+        message:"Scout not found"
+      })
+    }else{
+      res.status(200).json({
+        message:"Scout found",
+        data: findScout
+      })
+    }
+
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({
+      message: "Internal Sever Error"
+    })
+  }
+};
+
 module.exports = {
   signUp,
   verifyEmail,
@@ -312,4 +341,5 @@ module.exports = {
   resetPassword,
   changePassword,
   signOut,
+  getScout
 };

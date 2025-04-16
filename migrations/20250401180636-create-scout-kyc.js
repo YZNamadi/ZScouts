@@ -39,7 +39,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull:false
       },
-      preferredAge: {
+      age: {
         type: Sequelize.STRING,
         allowNull:false
       },
