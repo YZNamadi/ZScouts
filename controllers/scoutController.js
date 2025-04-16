@@ -64,7 +64,7 @@ const signUp = async (req, res) => {
       isVerified: false,
     });
 
-    const verificationLink = `${req.protocol}://${req.get('host')}/api/scouts/verify-email/${token}`;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
@@ -127,7 +127,7 @@ const resendVerificationEmail = async (req, res) => {
     }
 
     const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '50m' });
-    const verificationLink = `${req.protocol}://${req.get('host')}/api/scouts/verify-email/${token}`;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
@@ -206,7 +206,7 @@ const forgotPassword = async (req, res) => {
     }
 
     const resetToken = await jwt.sign({ scoutId: scout.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
-    const resetLink = `${req.protocol}://${req.get('host')}/api/scouts/reset-password/${resetToken}`;
+    const resetLink = `https://z-scoutsf.vercel.app/reset_password/${resetToken}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
@@ -225,7 +225,7 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { password } = req.body;
+    const { newPassword, confirmPassword } = req.body;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const scout = await Scout.findOne({ where: { id: decoded.scoutId } });
@@ -233,6 +233,12 @@ const resetPassword = async (req, res) => {
     if (!scout) {
       return res.status(404).json({ message: 'Scout not found' });
     }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        message: 'Password does not match'
+      })
+    };
 
     scout.password = await bcrypt.hash(password, 10);
     await scout.save();

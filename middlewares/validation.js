@@ -17,7 +17,7 @@ exports.registerValidation = (req, res, next) => {
 
         email: Joi.string()
             .email()
-            .pattern(/^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/)
+            .pattern(/^[a-z0-9](\.?[a-z0-9]){5,}@(gmail|yahoo)\.com$/)
             .required()
             .messages({
                 'string.email': 'Invalid email format',
