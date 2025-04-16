@@ -126,7 +126,7 @@ router.post("/login",loginValidation, scoutAuthController.signIn);
  *       200:
  *         description: Password reset email sent successfully.
  */
-router.get("/forgot-password", forgetPasswords, scoutAuthController.forgotPassword);
+router.post("/forgot-password", forgetPasswords, scoutAuthController.forgotPassword);
 
 /**
  * @swagger
@@ -149,7 +149,7 @@ router.get("/forgot-password", forgetPasswords, scoutAuthController.forgotPasswo
  *             type: object
  *             required:
  *               - password
- *               - existingPassword
+ *               - confirmPassword
  *             properties:
  *               password:
  *                 type: string
