@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config();
-const { Player } = require('../models');
+const { Player, PlayerKyc } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -57,7 +57,7 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
@@ -118,7 +118,7 @@ const resendVerificationEmail = async (req, res) => {
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
-    const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
@@ -193,7 +193,7 @@ const forgotPassword = async (req, res) => {
 
     const resetToken = jwt.sign({ playerId: player.id }, process.env.JWT_SECRET, { expiresIn: "30m" });
 
-    const resetLink = `${req.protocol}://${req.get("host")}/api/players/reset-password/${resetToken}`;
+    const resetLink = `https://z-scoutsf.vercel.app/reset_password/${resetToken}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
@@ -344,6 +344,34 @@ const getPlayerContact = async (req, res) => {
   }
 };
 
+const getPlayer = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    const findPlayer = await Player.findOne({
+      where: { id },
+      include: [{ model: PlayerKyc, as: 'playerKyc' }]
+    });
+    
+    if(!findPlayer){
+      res.status(400).json({
+        message:"Player not found"
+      })
+    }else{
+      res.status(200).json({
+        message:"Player found",
+        data: findPlayer
+      })
+    }
+
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({
+      message: "Internal Sever Error"
+    })
+  }
+};
+
 module.exports = {
   signUp,
   verifyEmail,
@@ -354,5 +382,6 @@ module.exports = {
   changePassword,
   signOut,
   searchPlayers,
-  getPlayerContact
+  getPlayerContact,
+  getPlayer
 };

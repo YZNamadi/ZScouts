@@ -14,7 +14,8 @@ const {
   changePassword,
   signOut,
   searchPlayers,
-  getPlayerContact
+  getPlayerContact,
+  getPlayer,
 } = require("../controllers/playerController");
 
 // Standard player auth routes
@@ -389,6 +390,92 @@ router.get("/players/search", searchPlayers);
  *         description: Internal server error.
  */
 router.get("/contact/:id", authenticate, getPlayerContact);
+/**
+ * @swagger
+ * /api/players/getplayer/{id}:
+ *   get:
+ *     summary: Get a player by ID
+ *     tags: [Players]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: UUID of the player to retrieve
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Player found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player found
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     fullname:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     isVerified:
+ *                       type: boolean
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     playerKyc:
+ *                       type: object
+ *                       properties:
+ *                         nationality:
+ *                           type: string
+ *                         phoneNumber:
+ *                           type: string
+ *                         verificationDocument:
+ *                           type: string
+ *                         clubName:
+ *                           type: string
+ *                         playingRole:
+ *                           type: string
+ *                         league:
+ *                           type: string
+ *                         preferredFoot:
+ *                           type: string
+ *                         preferredPosition:
+ *                           type: string
+ *                         socialMediaProfile:
+ *                           type: string
+ *       400:
+ *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.get('/getplayer/:id', getPlayer);
 
 module.exports = router;
 

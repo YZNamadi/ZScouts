@@ -269,5 +269,91 @@ router.get('/auth/google/callback',
       res.status(500).json({ message: error.message });
     }
 });
+/**
+ * @swagger
+ * /api/scouts/getscout/{id}:
+ *   get:
+ *     summary: Get a scout by ID
+ *     tags: [Scouts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: UUID of the scout to retrieve
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Scout found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout found
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     fullname:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     isVerified:
+ *                       type: boolean
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     scoutKyc:
+ *                       type: object
+ *                       properties:
+ *                         nationality:
+ *                           type: string
+ *                         phoneNumber:
+ *                           type: string
+ *                         verificationDocument:
+ *                           type: string
+ *                         clubName:
+ *                           type: string
+ *                         scoutingRole:
+ *                           type: string
+ *                         league:
+ *                           type: string
+ *                         preferredPosition:
+ *                           type: string
+ *                         preferredAge:
+ *                           type: string
+ *                         socialMediaProfile:
+ *                           type: string
+ *       400:
+ *         description: Scout not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout not found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.get('/getscout/:id', scoutAuthController.getScout)
 
 module.exports = router;

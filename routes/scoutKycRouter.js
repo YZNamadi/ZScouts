@@ -51,7 +51,7 @@ const router = require('express').Router();
  *               preferredPosition:
  *                 type: string
  *                 description: Preferred position the scout specializes in
- *               preferredAge:
+ *               age:
  *                 type: string
  *                 description: Preferred age group the scout specializes in
  *               socialMediaProfile:
