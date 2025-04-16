@@ -205,22 +205,32 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: 'Scout not found' });
     }
 
+    // Generate the reset token
     const resetToken = await jwt.sign({ scoutId: scout.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
+
+    // Construct the reset link (pointing to the GET route)
     const resetLink = `${req.protocol}://${req.get('host')}/api/scouts/reset-password/${resetToken}`;
+
+    // Email content
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
       subject: 'Scout Password Reset',
-      html: `Please click on the link to reset your password: <a href="${resetLink}">Reset Password</a>`,
+      html: `
+        <p>Please click on the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+      `,
     };
 
+    // Send the email
     await transporter.sendMail(mailOptions);
+
+    // Respond to the client
     res.status(200).json({ message: 'Password reset email sent successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 //Reset Pass
 const resetPassword = async (req, res) => {
   try {
