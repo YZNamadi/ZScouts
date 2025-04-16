@@ -18,7 +18,7 @@ exports.playerInfo = async(req, res)=>{
                     message: "Please upload a short vidoe showing your skills"
                 });
             };
-
+            console.log(req.body.openToTrials)
         const player = await Player.findByPk(playerId);
         if(!player){
             fs.unlinkSync(req.file.path)
@@ -60,10 +60,7 @@ exports.playerInfo = async(req, res)=>{
             })
     } catch (error) {
         console.log(error.message)
-           if (req.file.path) {
-                    // Unlink the file from our local storage
-                    fs.unlinkSync(req.file.path)
-                }
+
         res.status(500).json({
         
             message:"Unable to complete KYC" + error.message
