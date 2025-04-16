@@ -1,4 +1,4 @@
-exports.reset = (firstName, link) => {
+exports.reset = (fullName, link) => {
     return `
     <!DOCTYPE html>
 <html lang="en">

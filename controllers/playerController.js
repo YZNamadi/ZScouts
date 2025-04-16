@@ -62,7 +62,7 @@ const signUp = async (req, res) => {
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: `Welcome ${fullname}, Kindly use this link to verify your email: ${lteink}`,
+      subject: `Welcome ${fullname}, Kindly use this link to verify your email: ${link}`,
       html: verify(fullname, link)
     };
 
