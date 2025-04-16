@@ -194,8 +194,8 @@ router.post("/change-password", changePasswordValidation, scoutAuthController.ch
  * @swagger
  * /api/scouts/sign-out:
  *   post:
- *     summary: Sign out the scout/player
- *     tags: [Players]
+ *     summary: Sign out the scout
+ *     tags: [Scouts]
  *     description: Signs out a scout by invalidating the token via blacklisting.
  *     security:
  *       - bearerAuth: []
