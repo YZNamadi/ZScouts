@@ -194,7 +194,6 @@ const signIn = async (req, res) => {
   }
 };
 
-
 // Forgot Pass
 const forgotPassword = async (req, res) => {
   try {
@@ -227,7 +226,8 @@ const forgotPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-//Reset Pass
+
+// Reset Pass
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
@@ -246,7 +246,7 @@ const resetPassword = async (req, res) => {
       })
     };
 
-    scout.password = await bcrypt.hash(password, 10);
+    scout.password = await bcrypt.hash(newPassword, 10);
     await scout.save();
 
     res.status(200).json({ message: 'Password reset successful' });
@@ -255,8 +255,35 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// Scout Sign Out
+// Change Password
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const scout = await Scout.findOne({ where: { id: req.userId } });
 
+    if (!scout) {
+      return res.status(404).json({ message: 'Scout not found' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, scout.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Old password is incorrect' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'New passwords do not match' });
+    }
+
+    scout.password = await bcrypt.hash(newPassword, 10);
+    await scout.save();
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Scout Sign Out
 const revokedTokens = new Set();
 
 const signOut = async (req, res) => {
@@ -276,7 +303,6 @@ const signOut = async (req, res) => {
   }
 };
 
-
 module.exports = {
   signUp,
   verifyEmail,
@@ -284,5 +310,6 @@ module.exports = {
   signIn,
   forgotPassword,
   resetPassword,
+  changePassword,
   signOut,
 };

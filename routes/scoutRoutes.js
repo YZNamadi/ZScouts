@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport"); 
 const jwt = require("jsonwebtoken");
-const {registerValidation, forgetPasswords, loginValidation, resetPasswordValidation} = require("../middlewares/validation")
+const {registerValidation, forgetPasswords, loginValidation, resetPasswordValidation, changePasswordValidation} = require("../middlewares/validation");
 const scoutAuthController = require("../controllers/scoutController");
 
 /**
@@ -103,7 +103,7 @@ router.post("/resend-verification", scoutAuthController.resendVerificationEmail)
  *       200:
  *         description: Scout signed in successfully.
  */
-router.post("/login",loginValidation, scoutAuthController.signIn);
+router.post("/login", loginValidation, scoutAuthController.signIn);
 
 /**
  * @swagger
@@ -153,17 +153,46 @@ router.post("/forgot-password", forgetPasswords, scoutAuthController.forgotPassw
  *             properties:
  *               password:
  *                 type: string
- *               existingPassword:
+ *               confirmPassword:
  *                 type: string
  *     responses:
  *       200:
  *         description: Password reset successful.
  */
-router.post("/reset-password/:token",resetPasswordValidation, scoutAuthController.resetPassword);
+router.post("/reset-password/:token", resetPasswordValidation, scoutAuthController.resetPassword);
 
 /**
  * @swagger
- * /api/players/sign-out:
+ * /api/scouts/change-password:
+ *   post:
+ *     summary: Change scout's password
+ *     tags: [Scouts]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - oldPassword
+ *               - newPassword
+ *               - confirmPassword
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully.
+ */
+router.post("/change-password", changePasswordValidation, scoutAuthController.changePassword);
+
+/**
+ * @swagger
+ * /api/scouts/sign-out:
  *   post:
  *     summary: Sign out the scout/player
  *     tags: [Players]
