@@ -148,10 +148,10 @@ router.post("/forgot-password", forgetPasswords, scoutAuthController.forgotPassw
  *           schema:
  *             type: object
  *             required:
- *               - password
+ *               - newPassword
  *               - confirmPassword
  *             properties:
- *               password:
+ *               newPassword:
  *                 type: string
  *               confirmPassword:
  *                 type: string

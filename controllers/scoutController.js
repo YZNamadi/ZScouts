@@ -239,7 +239,10 @@ const resetPassword = async (req, res) => {
     const { newPassword, confirmPassword } = req.body;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const scout = await Scout.findOne({ where: { id: decoded.scoutId } });
+    
+
+    const scout = await Scout.findOne({ where: { id: decoded.userId } });
+
 
     if (!scout) {
       return res.status(404).json({ message: 'Scout not found' });

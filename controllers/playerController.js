@@ -219,17 +219,17 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { newPassword, confirmPassword} = req.body;
+    const { newPassword, confirmPassword } = req.body;
 
-    const { playerId } = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded= jwt.verify(token, process.env.JWT_SECRET);
 
-    const player = await Player.findByPk(playerId);
+    const player = await Player.findOne({ where: { id: decoded.userId } });
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
 
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: 'Password does not match' });
+      return res.status(400).json({ message: 'Passwords do not match' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -241,6 +241,7 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 //  Change Password
 const changePassword = async (req, res) => {
