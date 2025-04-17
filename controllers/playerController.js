@@ -58,7 +58,7 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify_player/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
@@ -119,7 +119,7 @@ const resendVerificationEmail = async (req, res) => {
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
+    const verificationLink = `https://z-scoutsf.vercel.app/email_verify_player${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
@@ -194,7 +194,7 @@ const forgotPassword = async (req, res) => {
 
     const resetToken = jwt.sign({ playerId: player.id }, process.env.JWT_SECRET, { expiresIn: "30m" });
 
-    const resetLink = `https://z-scoutsf.vercel.app/reset_password/${resetToken}`;
+    const resetLink = `https://z-scoutsf.vercel.app/reset_password_players${resetToken}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
