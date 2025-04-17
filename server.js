@@ -4,6 +4,7 @@ const sequelize = require('./database/sequelize');
 const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const morgan = require('morgan');
 
 const playerRoutes = require('./routes/playerRoutes');
 const scoutRoutes = require('./routes/scoutRoutes');
@@ -17,6 +18,7 @@ const PORT = process.env.PORT;
 const app = express();
 
 app.use(express.json());
+app.use(morgan('dev'));
 
 
 app.use(cors());
