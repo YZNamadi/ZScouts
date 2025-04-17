@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     preferredFoot: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('left', 'right', 'both'),
       allowNull:false
     },
     phoneNumber: {
@@ -83,6 +83,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('YES','NO'),
       allowNull:false
     },
+    profilePic:{
+      type: DataTypes.STRING,
+      allowoNull:false
+    },
+
   }, {
     tableName: 'PlayerKycs',
     timestamps: true,

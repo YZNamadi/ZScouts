@@ -52,6 +52,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false
     },
+    profilePic:{
+      type: DataTypes.STRING,
+      allowoNull: true
+    }
+
   }, {
     tableName: 'ScoutKycs',
     timestamps: true,

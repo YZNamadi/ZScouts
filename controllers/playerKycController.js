@@ -60,10 +60,10 @@ exports.playerInfo = async(req, res)=>{
             })
     } catch (error) {
         console.log(error.message)
-           if (req.file.path) {
-                    // Unlink the file from our local storage
-                    fs.unlinkSync(req.file.path)
-                }
+        //    if (req.file.path) {
+        //             // Unlink the file from our local storage
+        //             fs.unlinkSync(req.file.path)
+        //         }
         res.status(500).json({
         
             message:"Unable to complete KYC" + error.message
@@ -198,4 +198,92 @@ exports.deletePlayerInfo = async(req, res) => {
         });
     }
 };
+
+
+exports.profilePic = async (req, res) => {
+  try {
+    const { id: playerId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please upload a profile picture"
+      });
+    }
+
+    const player = await PlayerKyc.findOne({ where: { playerId } });
+    if (!player) {
+      if (req.file && req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(404).json({
+        message: "Player not found"
+      });
+    }
+    const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'image'});
+
+    fs.unlinkSync(req.file.path);
+
+    player.profilePic = result.secure_url;
+    await player.save();
+
+    res.status(200).json({
+      message: "Profile picture successfully uploaded",
+      data: {
+        profilePic: result.secure_url
+      }
+    });
+
+  } catch (error) {
+    console.error("Profile Pic Upload Error:", error.message);
+    res.status(500).json({
+      message: "Unable to upload player profile picture: " + error.message
+    });
+  }
+};
+
+
+exports.deleteProfilePic = async (req, res) => {
+    try {
+      const { id: playerId } = req.params;
+  
+      const player = await PlayerKyc.findOne({ where: { playerId } });
+  
+      if (!player) {
+        return res.status(404).json({
+          message: "Player not found"
+        });
+      }
+  
+      if (!player.profilePic) {
+        return res.status(400).json({
+          message: "No profile picture to delete"
+        });
+      }
+  
+      const fileName = player.profilePic.split('/').pop();
+      const publicId = fileName.split('.')[0]; 
+  
+      if (!publicId) {
+        return res.status(400).json({
+          message: "Unable to determine image ID from URL"
+        });
+      }
+  
+      await cloudinary.uploader.destroy(publicId);
+      
+      scout.profilePic = null;
+      await player.save();
+  
+      res.status(200).json({
+        message: "Profile picture successfully deleted"
+      });
+  
+    } catch (error) {
+      console.error("Delete Profile Pic Error:", error.message);
+      res.status(500).json({
+        message: "Unable to delete profile picture: " + error.message
+      });
+    }
+  };
+  
 

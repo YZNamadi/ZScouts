@@ -314,7 +314,7 @@ const getScout = async (req, res) => {
     });
     
     if(!findScout){
-      res.status(400).json({
+     return res.status(400).json({
         message:"Scout not found"
       })
     }else{
@@ -331,6 +331,8 @@ const getScout = async (req, res) => {
     })
   }
 };
+
+
 
 module.exports = {
   signUp,

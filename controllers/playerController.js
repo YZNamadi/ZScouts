@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const emailTemplate = require("../utils/signup");
 const { Op } = require("sequelize");
+const player = require('../models/player');
 
 // Create a nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -57,7 +58,7 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
+    const verificationLink = `${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
@@ -354,7 +355,7 @@ const getPlayer = async (req, res) => {
     });
     
     if(!findPlayer){
-      res.status(400).json({
+     return res.status(400).json({
         message:"Player not found"
       })
     }else{
@@ -372,6 +373,124 @@ const getPlayer = async (req, res) => {
   }
 };
 
+const positionSearch = async (req, res) => {
+  try {
+    const { primaryPosition } = req.body;
+
+    const players = await Player.findAll({
+      attributes: ['fullname'],
+      include: [
+        {
+          model: PlayerKyc,
+          as: 'playerKyc',
+          where: { primaryPosition },
+          attributes: {
+            exclude: ['id', 'playerId']
+          }
+        }
+      ]
+    });
+
+    res.status(200).json({
+      message: `Players with primary position: ${primaryPosition}`,
+      data: players
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+const footSearch = async (req, res) => {
+  try {
+    const { preferredFoot } = req.body;
+
+    const players = await Player.findAll({
+      attributes: ['fullname'],
+      include: [
+        {
+          model: PlayerKyc,
+          as: 'playerKyc',
+          where: { preferredFoot },
+          attributes: {
+            exclude: ['id', 'playerId']
+          }
+        }
+      ]
+    });
+
+    res.status(200).json({
+      message: `${preferredFoot} footed players `,
+      data: players
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getAllVideosByPlayer = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const player = await Player.findOne({ where: { id } });
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    const playerKyc = await PlayerKyc.findAll({
+      where: { playerId: id },
+      attributes: ['media']
+    });
+
+    if (!playerKyc) {
+      return res.status(404).json({ message: "Player Videos not found" });
+    }
+
+    res.status(200).json({
+      message: "All videos of players in the Database",
+      data: playerKyc
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getOneVideoOfPlayer = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const player = await Player.findOne({ where: { id } });
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    const playerKyc = await PlayerKyc.findOne({
+      where: { playerId: id },
+      attributes: ['media']
+    });
+
+    if (!playerKyc) {
+      return res.status(404).json({ message: "video of player not found" });
+    }
+
+    res.status(200).json({
+      message: "video of player retrived successfully",
+      data: playerKyc
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
 module.exports = {
   signUp,
   verifyEmail,
@@ -383,5 +502,9 @@ module.exports = {
   signOut,
   searchPlayers,
   getPlayerContact,
-  getPlayer
+  getPlayer,
+  positionSearch,
+  footSearch,
+getAllVideosByPlayer,
+getOneVideoOfPlayer
 };

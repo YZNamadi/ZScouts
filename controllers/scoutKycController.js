@@ -209,3 +209,87 @@ exports.deleteScoutInfo = async(req, res) => {
         });
     }
 };
+
+exports.profilePic = async (req, res) => {
+    try {
+      const { id: scoutId } = req.params;
+  
+      const scout = await Scout.findByPk(scoutId);
+      if (!scout) {
+        if (req.file.path) {
+          fs.unlinkSync(req.file.path); 
+        }
+        return res.status(404).json({
+          message: "Scout not found"
+        });
+      }
+  
+      const result = await cloudinary.uploader.upload(req.file.path, {resource_type: 'image'});
+  
+      fs.unlinkSync(req.file.path); 
+  
+      scout.profilePic = result.secure_url;
+      await scout.save();
+  
+      res.status(200).json({
+        message: "Profile picture successfully uploaded",
+        data: {
+          profilePic: result.secure_url
+        }
+      });
+  
+    } catch (error) {
+      console.error("Profile Pic Upload Error:", error.message);
+      res.status(500).json({
+        message: "Unable to upload scout profile picture: " + error.message
+      });
+    }
+  };
+  
+  exports.deleteScoutProfilePic = async (req, res) => {
+      try {
+
+        const { id: scoutId } = req.params;
+        const scout = await Scout.findByPk(scoutId);
+        if (!scout) {
+          if (req.file.path) {
+            fs.unlinkSync(req.file.path); 
+          }
+          return res.status(404).json({
+            message: "Scout not found"
+          });
+        }
+    
+    
+        if (!scout.profilePic) {
+          return res.status(400).json({
+            message: "No profile picture to delete"
+          });
+        }
+    
+        const fileName = player.profilePic.split('/').pop();
+        const publicId = fileName.split('.')[0]; 
+    
+        if (!publicId) {
+          return res.status(400).json({
+            message: "Unable to determine image ID from URL"
+          });
+        }
+    
+        await cloudinary.uploader.destroy(publicId);
+        
+        scout.profilePic = null;
+        await scout.save();
+    
+        res.status(200).json({
+          message: "Profile picture successfully deleted"
+        });
+    
+      } catch (error) {
+        console.error("Delete Profile Pic Error:", error.message);
+        res.status(500).json({
+          message: "Unable to delete profile picture: " + error.message
+        });
+      }
+    };
+  

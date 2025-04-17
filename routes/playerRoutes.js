@@ -16,6 +16,10 @@ const {
   searchPlayers,
   getPlayerContact,
   getPlayer,
+  positionSearch,
+  footSearch,
+  getAllVideosByPlayer,
+  getOneVideoOfPlayer
 } = require("../controllers/playerController");
 
 // Standard player auth routes
@@ -476,6 +480,227 @@ router.get("/contact/:id", authenticate, getPlayerContact);
  *                   example: Internal Server Error
  */
 router.get('/getplayer/:id', getPlayer);
+/**
+ * @swagger
+ * /playerposition:
+ *   post:
+ *     summary: Search players by primary position
+ *     description: Returns a list of players whose primary position matches the given value.
+ *     tags:
+ *       - Players
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - primaryPosition
+ *             properties:
+ *               primaryPosition:
+ *                 type: string
+ *                 example: Midfielder
+ *     responses:
+ *       200:
+ *         description: A list of players matching the primary position
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Players with primary position: Midfielder
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       fullname:
+ *                         type: string
+ *                         example: Lionel Messi
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.post('/playerposition', positionSearch);
+
+/**
+ * @swagger
+ * /filterfoot:
+ *   post:
+ *     summary: Filter players by preferred foot
+ *     description: Returns a list of players whose preferred foot matches the given value.
+ *     tags:
+ *       - Players
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - preferredFoot
+ *             properties:
+ *               preferredFoot:
+ *                 type: string
+ *                 example: Right
+ *     responses:
+ *       200:
+ *         description: A list of players matching the preferred foot
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Right footed players
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       fullname:
+ *                         type: string
+ *                         example: Cristiano Ronaldo
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.post('/filterfoot', footSearch);
+
+/**
+ * @swagger
+ * /player-vids/{id}:
+ *   get:
+ *     summary: Get all videos by player ID
+ *     description: Returns a list of videos (media) associated with a specific player by their ID.
+ *     tags:
+ *       - Players
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the player
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     responses:
+ *       200:
+ *         description: All videos of the specified player
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: All videos of players in the Database
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       media:
+ *                         type: string
+ *                         example: https://example.com/video1.mp4
+ *       404:
+ *         description: Player or videos not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.get('/player-vids/:id', getAllVideosByPlayer);
+
+
+/**
+ * @swagger
+ * /oneplayer-vid/{id}:
+ *   get:
+ *     summary: Get a single video of a player by ID
+ *     description: Retrieves one video (media) for a specific player using their ID.
+ *     tags:
+ *       - Players
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the player
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     responses:
+ *       200:
+ *         description: Video of the player retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: video of player retrived successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     media:
+ *                       type: string
+ *                       example: https://example.com/video1.mp4
+ *       404:
+ *         description: Player or video not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: video of player not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.get('/oneplayer-vid/:id', getOneVideoOfPlayer);
+
+
 
 module.exports = router;
+
 

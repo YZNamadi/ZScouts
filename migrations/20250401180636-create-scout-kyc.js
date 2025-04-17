@@ -47,6 +47,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull:false
       },
+      profilePic:{
+        type: Sequelize.STRING,
+        allowoNull: true
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
