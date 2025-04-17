@@ -167,7 +167,7 @@ router.post("/forgot-password", forgetPasswords, forgotPassword);
  *           schema:
  *             type: object
  *             required:
- *               - password
+ *               - newPassword
  *               - confirmPassword
  *             properties:
  *               newPassword:
@@ -311,7 +311,7 @@ router.get('/auth/google/login',
 
 /**
  * @swagger
- * /api/v1/players/search:
+ * /api/players/search:
  *   get:
  *     summary: Search for players based on filters
  *     tags: [Player Discovery]
@@ -482,9 +482,9 @@ router.get("/contact/:id", authenticate, getPlayerContact);
 router.get('/getplayer/:id', getPlayer);
 /**
  * @swagger
- * /playerposition:
+ * /api/players/playerposition:
  *   post:
- *     summary: Search players by primary position
+ *     summary: Filter players by primary position
  *     description: Returns a list of players whose primary position matches the given value.
  *     tags:
  *       - Players
@@ -510,7 +510,7 @@ router.get('/getplayer/:id', getPlayer);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Players with primary position: Midfielder
+ *                   example: "Players with primary position: Midfielder"
  *                 data:
  *                   type: array
  *                   items:
@@ -534,7 +534,7 @@ router.post('/playerposition', positionSearch);
 
 /**
  * @swagger
- * /filterfoot:
+ * /api/players/filterfoot:
  *   post:
  *     summary: Filter players by preferred foot
  *     description: Returns a list of players whose preferred foot matches the given value.

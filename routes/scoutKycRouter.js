@@ -200,7 +200,7 @@ router.put('/scouts/:id', upload.single('verificationDocument'),updateScoutInfo)
 router.delete('/scoutkyc/:id/', deleteScoutInfo);
 /**
  * @swagger
- * /scoutprofile-pic/{id}:
+ * /api/v1/scoutprofile-pic/{id}:
  *   post:
  *     summary: Upload scout profile picture
  *     description: Uploads a profile picture for a specific scout using their ID. Requires a multipart/form-data request with an image file.
@@ -272,7 +272,7 @@ router.delete('/scoutkyc/:id/', deleteScoutInfo);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unable to upload scout profile picture: <error message>
+ *                   example: "Unable to upload scout profile picture: <error message>"
  */
 router.post('/scoutprofile-pic/:id', upload.single('profilepic'), profilePic);
 

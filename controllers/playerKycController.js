@@ -159,46 +159,53 @@ exports.updatePlayerInfo = async(req, res) => {
     }
 };
 
-exports.deletePlayerInfo = async(req, res) => {
+exports.deletePlayerInfo = async (req, res) => {
     try {
-        const { id:playerId} = req.params;
-
-        const player = await Player.findByPk(playerId);
-        if (!player) {
-            return res.status(404).json({
-                message: "Player not found"
-            });
-        }
-
-        const playerKyc = await PlayerKyc.findOne({where:{ playerId }});
-
-        if (!PlayerKyc) {
-            return res.status(404).json({
-                message: "Player profile not found"
-            });
-        }
-        const documentUrl = playerKyc.media;
-        if (documentUrl) {
-            const fileExtension = documentUrl.split('.').pop();
-
-            const resourceType = fileExtension === 'video/' || fileExtension === 'application/' || fileExtension === 'image/';
-            const publicId = documentUrl.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
-        }
-
-        await playerKyc.destroy();
-
-        res.status(200).json({
-            message: "Player profile deleted successfully"
+      const { id: playerId } = req.params;
+  
+      const player = await Player.findByPk(playerId);
+      if (!player) {
+        return res.status(404).json({
+          message: "Player not found"
         });
+      }
+  
+      const playerKyc = await PlayerKyc.findOne({ where: { playerId } });
+      if (!playerKyc) {
+        return res.status(404).json({
+          message: "Player profile not found"
+        });
+      }
+  
+      const documentUrl = playerKyc.media;
+      if (documentUrl) {
+        const fileName = documentUrl.split('/').pop();
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const publicId = fileName.split('.')[0];
+  
+        let resourceType = 'image'; // Default
+        if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
+          resourceType = 'video';
+        } else if (['pdf', 'docx'].includes(fileExtension)) {
+          resourceType = 'raw';
+        }
+  
+        await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+      }
+  
+      await playerKyc.destroy();
+  
+      res.status(200).json({
+        message: "Player profile deleted successfully"
+      });
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({
-            message: "Unable to delete player profile: " + error.message
-        });
+      console.error("Delete Player Info Error:", error.message);
+      res.status(500).json({
+        message: "Unable to delete player profile: " + error.message
+      });
     }
-};
-
+  };
+  
 
 exports.profilePic = async (req, res) => {
   try {

@@ -253,7 +253,7 @@ router.delete('/playerskyc/:id/', deletePlayerInfo);
 
 /**
  * @swagger
- * /profilepic/{id}:
+ * /api/v1/profilepic/{id}:
  *   post:
  *     summary: Upload player profile picture
  *     description: Uploads a profile picture for a specific player using their ID. Requires a multipart/form-data request with an image file.
@@ -325,13 +325,13 @@ router.delete('/playerskyc/:id/', deletePlayerInfo);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unable to upload player profile picture: <error message>
+ *                   example: "Unable to upload player profile picture: <error message>"
  */
 router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
 
 /**
  * @swagger
- * /delete-profile-pic/{id}:
+ * /api/v1/delete-profile-pic/{id}:
  *   delete:
  *     summary: Delete a player's profile picture
  *     description: Deletes the profile picture of a specific player by their ID from Cloudinary.
@@ -385,7 +385,7 @@ router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unable to delete profile picture: <error message>
+ *                   example: "Unable to delete profile picture: <error message>"
  */
 router.delete('/delete-profile-pic/:id', deleteProfilePic);
 
