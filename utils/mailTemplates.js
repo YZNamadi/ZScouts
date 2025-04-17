@@ -1,4 +1,4 @@
-exports.reset = (resetLink, fullname) => {
+exports.reset = (resetLink, firstName) => {
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -110,7 +110,7 @@ exports.reset = (resetLink, fullname) => {
                 <img src="https://res.cloudinary.com/dihonf8ai/image/upload/v1744908308/logo_ysyv7k.png" alt="ZScouts Logo" />
             </div>
             <div class="user_name">
-                <h4>${fullname}</h4>
+                <h4>${firstName}</h4>
             </div>
             <div class="wrapper_content">
                 <h3>Forgot your password😱? No worries!!</h3>
@@ -120,7 +120,7 @@ exports.reset = (resetLink, fullname) => {
             <div class="wrapper_footer">
                 <p>If you didn’t initiate please ignore this email.</p>
                 <h4>The ZScouts Team</h4>
-                &copy; ${new Date().getFullYear()} ZScouts. All rights reserved.
+               <p>&copy; ${new Date().getFullYear()} ZScouts. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -130,7 +130,7 @@ exports.reset = (resetLink, fullname) => {
 
 
 
-exports.verify = (verificationLink, fullname) => {
+exports.verify = (verificationLink, firstName) => {
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -242,7 +242,7 @@ exports.verify = (verificationLink, fullname) => {
                 <img src="https://res.cloudinary.com/dihonf8ai/image/upload/v1744908308/logo_ysyv7k.png" alt="ZScouts Logo" />
             </div>
             <div class="user_name">
-                <h4>${fullname}</h4>
+                <h4>${firstName}</h4>
             </div>
             <div class="wrapper_content">
                 <h3>Welcome to ZScouts! You’re just one step away from unlocking your football journey.</h3>
@@ -252,7 +252,7 @@ exports.verify = (verificationLink, fullname) => {
             <div class="wrapper_footer">
                 <p>If you didn’t sign up for ZScouts, please ignore this email.</p>
                 <h4>The ZScouts Team</h4>
-                &copy; ${new Date().getFullYear()} ZScouts. All rights reserved.
+                <p>&copy; ${new Date().getFullYear()} ZScouts. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -261,7 +261,7 @@ exports.verify = (verificationLink, fullname) => {
 };
 
 
-exports.resendVerifyEmail = (resendVerifyLink, fullname) => {
+exports.resendVerifyEmail = (resendVerifyLink, firstName) => {
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -373,7 +373,7 @@ exports.resendVerifyEmail = (resendVerifyLink, fullname) => {
                 <img src="https://res.cloudinary.com/dihonf8ai/image/upload/v1744908308/logo_ysyv7k.png" alt="ZScouts Logo" />
             </div>
             <div class="user_name">
-                <h4>${fullname}</h4>
+                <h4>${firstName}</h4>
             </div>
             <div class="wrapper_content">
                 <h3>Welcome to ZScouts!</h3>
@@ -383,7 +383,7 @@ exports.resendVerifyEmail = (resendVerifyLink, fullname) => {
             <div class="wrapper_footer">
                 <p>If you didn’t sign up for ZScouts, please ignore this email.</p>
                 <h4>The ZScouts Team</h4>
-                &copy; ${new Date().getFullYear()} ZScouts. All rights reserved.
+               <p>&copy; ${new Date().getFullYear()} ZScouts. All rights reserved.</p>
             </div>
         </div>
     </body>

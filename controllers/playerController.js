@@ -62,11 +62,12 @@ const signUp = async (req, res) => {
     });
 
     const verificationLink = `https://z-scoutsf.vercel.app/email_verify_player/${token}`;
+    const firstName =player.fullname.split(" ")[0];
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: "Verify your player account",
-      html: verify(verificationLink, fullname)
+      subject: "Verify your Player account",
+      html: verify(verificationLink, firstName)
     };
 
     await transporter.sendMail(mailOptions);
@@ -123,11 +124,12 @@ const resendVerificationEmail = async (req, res) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
     const resendVerifyLink = `https://z-scoutsf.vercel.app/email_verify_player${token}`;
+    const firstName = player.fullname.split(" ")[0];
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
       subject: "Resend Player Verification",
-      html: resendVerifyEmail(resendVerifyLink, fullname)
+      html: resendVerifyEmail(resendVerifyLink, firstName)
     };
 
     await transporter.sendMail(mailOptions);
@@ -198,11 +200,12 @@ const forgotPassword = async (req, res) => {
     const resetToken = jwt.sign({ playerId: player.id }, process.env.JWT_SECRET, { expiresIn: "30m" });
 
     const resetLink = `https://z-scoutsf.vercel.app/reset_password_players${resetToken}`;
+    const firstName = player.fullname.split(" ")[0];
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
       subject: "Player Password Reset",
-      html:reset `Please click on the link to reset your password: <a href="${resetLink}">Reset Password</a>`
+      html:reset(resetLink, firstName)
     };
 
     await transporter.sendMail(mailOptions);

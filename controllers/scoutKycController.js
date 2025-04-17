@@ -139,9 +139,9 @@ exports.updateScoutInfo = async(req, res) => {
                 // Clean up local file
                 fs.unlinkSync(req.file.path);
             } catch (uploadError) {
-                if (req.file && req.file.path) {
-                    fs.unlinkSync(req.file.path);
-                }
+                // if (req.file && req.file.path) {
+                //     fs.unlinkSync(req.file.path);
+                // }
                 return res.status(400).json({
                     message: "Error uploading document: " + uploadError.message
                 });

@@ -69,11 +69,12 @@ const signUp = async (req, res) => {
     });
 
     const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
+    const firstName =scout.fullname.split(' ')[0]; // Get the first name from the full name
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
       subject: 'Verify Your Scout Account',
-      html: verify `Please click on the link to verify your email: <a href="${verificationLink}">Verify Email</a>`,
+      html: verify(verificationLink, firstName)
     };
 
     await transporter.sendMail(mailOptions);
@@ -132,11 +133,12 @@ const resendVerificationEmail = async (req, res) => {
 
     const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '50m' });
     const resendVerifyLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
+    const firstName = scout.fullname.split(' ')[0]; // Get the first name from the full name
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
       subject: 'Scout Email Verification',
-      html: resendVerifyEmail `Please click on the link to verify your email: <a href="${resendVerifyLink}">Verify Email</a>`,
+      html: resendVerifyEmail(resendVerifyLink, firstName),
     };
 
     await transporter.sendMail(mailOptions);
@@ -211,14 +213,13 @@ const forgotPassword = async (req, res) => {
     // Generate the reset token
     const resetToken = await jwt.sign({ scoutId: scout.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
     const resetLink = `https://z-scoutsf.vercel.app/reset_password/${resetToken}`;
+    const firstName = scout.fullname.split(' ')[0]; // Get the first name from the full name
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
       subject: 'Scout Password Reset',
-      html: reset `
-        <p>Please click on the link below to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-      `,
+      html: reset(resetLink, firstName)
+      ,
     };
 
     // Send the email
