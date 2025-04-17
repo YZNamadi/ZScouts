@@ -1,6 +1,7 @@
 
+const { deleteProfilePic } = require('../controllers/playerKycController');
 const scoutAuthController = require('../controllers/scoutController');
-const { scoutInfo, deleteScoutInfo, updateScoutInfo } = require('../controllers/scoutKycController');
+const { scoutInfo, deleteScoutInfo, updateScoutInfo, profilePic, deleteScoutProfilePic } = require('../controllers/scoutKycController');
 const upload = require('../utils/multer');
 
 const router = require('express').Router();
@@ -197,5 +198,85 @@ router.put('/scouts/:id', upload.single('verificationDocument'),updateScoutInfo)
  *                   example: "Unable to delete scout profile: [error message]"
  */
 router.delete('/scoutkyc/:id/', deleteScoutInfo);
+/**
+ * @swagger
+ * /scoutprofile-pic/{id}:
+ *   post:
+ *     summary: Upload scout profile picture
+ *     description: Uploads a profile picture for a specific scout using their ID. Requires a multipart/form-data request with an image file.
+ *     tags:
+ *       - Scouts
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Scout ID
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - profilepic
+ *             properties:
+ *               profilepic:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture successfully uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Profile picture successfully uploaded
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     profilePic:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v123456789/profile.jpg
+ *       400:
+ *         description: No profile picture uploaded or invalid file
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Please upload a profile picture
+ *       404:
+ *         description: Scout not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout not found
+ *       500:
+ *         description: Internal server error during upload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unable to upload scout profile picture: <error message>
+ */
+router.post('/scoutprofile-pic/:id', upload.single('profilepic'), profilePic);
+
+
+router.delete('/scoutdelete-profile-pic/:id', deleteScoutProfilePic);
 
 module.exports = router

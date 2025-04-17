@@ -31,7 +31,7 @@ module.exports = {
         allowNull:false
       },
       preferredFoot: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('left', 'right', 'both'),
         allowNull:false
       },
       phoneNumber: {
@@ -77,6 +77,10 @@ module.exports = {
       willingToRelocate: {
         type: Sequelize.ENUM('YES','NO'),
         allowNull:false
+      },
+      profilePic:{
+        type: Sequelize.STRING,
+        allowoNull:false
       },
       createdAt: {
         allowNull: false,

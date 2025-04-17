@@ -1,16 +1,10 @@
-const { playerInfo, updatePlayerInfo, deletePlayerInfo } = require('../controllers/playerKycController');
+const { playerInfo, updatePlayerInfo, deletePlayerInfo, profilePic, deleteProfilePic } = require('../controllers/playerKycController');
 const playerController = require('../controllers/playerController');
 const upload = require('../utils/multer');
 
 const router = require('express').Router();
 
 
-/**
- * @swagger
- * tags:
- *   name: Player KYC
- *   description: Endpoints for player KYC (Know Your Customer) information
- */
 
 /**
  * @swagger
@@ -64,7 +58,8 @@ const router = require('express').Router();
  *                 description: Weight of the player
  *               preferredFoot:
  *                 type: string
- *                 description: Preferred foot (e.g., Left, Right, Both)
+ *                 enum: [Left, Right, Both]
+ *                 description: preferred foot of the player
  *               phoneNumber:
  *                 type: string
  *                 description: Player's contact number
@@ -255,6 +250,145 @@ router.put('/players/:id', upload.single('media'),updatePlayerInfo);
  *                   example: "Unable to delete player profile: [error details]"
  */
 router.delete('/playerskyc/:id/', deletePlayerInfo);
+
+/**
+ * @swagger
+ * /profilepic/{id}:
+ *   post:
+ *     summary: Upload player profile picture
+ *     description: Uploads a profile picture for a specific player using their ID. Requires a multipart/form-data request with an image file.
+ *     tags:
+ *       - Players
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Player ID
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - profilepic
+ *             properties:
+ *               profilepic:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture successfully uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Profile picture successfully uploaded
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     profilePic:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v123456789/profile.jpg
+ *       400:
+ *         description: No profile picture uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Please upload a profile picture
+ *       404:
+ *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
+ *       500:
+ *         description: Internal server error during upload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unable to upload player profile picture: <error message>
+ */
+router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
+
+/**
+ * @swagger
+ * /delete-profile-pic/{id}:
+ *   delete:
+ *     summary: Delete a player's profile picture
+ *     description: Deletes the profile picture of a specific player by their ID from Cloudinary.
+ *     tags:
+ *       - [Players]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Player ID
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     responses:
+ *       200:
+ *         description: Profile picture successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Profile picture successfully deleted
+ *       400:
+ *         description: No profile picture to delete or invalid image ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No profile picture to delete
+ *       404:
+ *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
+ *       500:
+ *         description: Internal server error during deletion
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unable to delete profile picture: <error message>
+ */
+router.delete('/delete-profile-pic/:id', deleteProfilePic);
+
 
 
 module.exports = router
