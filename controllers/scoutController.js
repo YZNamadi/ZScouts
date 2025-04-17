@@ -4,6 +4,9 @@ require('dotenv').config();
 const { Scout, ScoutKyc } = require('../models'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const {reset} = require('../utils/mailTemplates');
+const { verify } = require('../utils/mailTemplates');
+const { resendVerifyEmail } = require('../utils/mailTemplates');
 const nodemailer = require('nodemailer');
 
 
@@ -70,7 +73,7 @@ const signUp = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: email,
       subject: 'Verify Your Scout Account',
-      html: `Please click on the link to verify your email: <a href="${verificationLink}">Verify Email</a>`,
+      html: verify `Please click on the link to verify your email: <a href="${verificationLink}">Verify Email</a>`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -128,12 +131,12 @@ const resendVerificationEmail = async (req, res) => {
     }
 
     const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '50m' });
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
+    const resendVerifyLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
       subject: 'Scout Email Verification',
-      html: `Please click on the link to verify your email: <a href="${verificationLink}">Verify Email</a>`,
+      html: resendVerifyEmail `Please click on the link to verify your email: <a href="${resendVerifyLink}">Verify Email</a>`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -212,7 +215,7 @@ const forgotPassword = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: scout.email,
       subject: 'Scout Password Reset',
-      html: `
+      html: reset `
         <p>Please click on the link below to reset your password:</p>
         <a href="${resetLink}">${resetLink}</a>
       `,

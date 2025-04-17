@@ -5,9 +5,12 @@ const { Player, PlayerKyc } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const emailTemplate = require("../utils/signup");
+// const emailTemplate = require("../utils/signup");
+const {reset} = require('../utils/mailTemplates');
+const  {verify}  = require('../utils/mailTemplates');
+const {resendVerifyEmail} = require('../utils/mailTemplates');
 const { Op } = require("sequelize");
-const player = require('../models/player');
+
 
 // Create a nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -62,8 +65,8 @@ const signUp = async (req, res) => {
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: `Welcome ${fullname}, Kindly use this link to verify your email: ${verificationLink}`,
-      html: emailTemplate(verificationLink, fullname)
+      subject: "Verify your player account",
+      html: verify(verificationLink, fullname)
     };
 
     await transporter.sendMail(mailOptions);
@@ -119,12 +122,12 @@ const resendVerificationEmail = async (req, res) => {
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "50m" });
 
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify_player${token}`;
+    const resendVerifyLink = `https://z-scoutsf.vercel.app/email_verify_player${token}`;
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: player.email,
       subject: "Resend Player Verification",
-      html: emailTemplate(verificationLink, fullname)
+      html: resendVerifyEmail(resendVerifyLink, fullname)
     };
 
     await transporter.sendMail(mailOptions);
@@ -199,7 +202,7 @@ const forgotPassword = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: player.email,
       subject: "Player Password Reset",
-      html: `Please click on the link to reset your password: <a href="${resetLink}">Reset Password</a>`
+      html:reset `Please click on the link to reset your password: <a href="${resetLink}">Reset Password</a>`
     };
 
     await transporter.sendMail(mailOptions);

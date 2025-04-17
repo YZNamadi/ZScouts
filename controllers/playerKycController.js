@@ -6,68 +6,99 @@ const cloudinary = require('../config/cloudinary');
 const fs = require('fs')
 
 
-exports.playerInfo = async(req, res)=>{
+exports.playerInfo = async (req, res) => {
     try {
-       const {id:playerId} = req.params
-        const {age,nationality,height,weight,preferredFoot,playingPosition,
-            phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,contactInfoOfCoaches,openToTrials, followDiet,willingToRelocate} = req.body
+        const { id: playerId } = req.params;
+        const { 
+            age, nationality, height, weight, preferredFoot, playingPosition,
+            phoneNumber, homeAddress, primaryPosition, secondaryPosition, currentClub,
+            strengths, contactInfoOfCoaches, openToTrials, followDiet, willingToRelocate
+        } = req.body;
 
-            if (!req.file) {
-                return res.status(400).json({
-                    message: "Please upload a short vidoe showing your skills"
-                });
-            };
+        // Check if the video file is uploaded
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Please upload a short video showing your skills"
+            });
+        }
 
+        // Find the player in the database
         const player = await Player.findByPk(playerId);
-        if(!player){
-            fs.unlinkSync(req.file.path)
+        if (!player) {
+            fs.unlinkSync(req.file.path);
             return res.status(404).json({
-                message:"Player not found"
-            })
-        };
+                message: "Player not found"
+            });
+        }
 
-        const existingKyc = await PlayerKyc.findOne({where:{playerId}})
-        if (existingKyc || player.profileCompletion){
+        // Check if the player already has KYC data or has completed profile
+        const existingKyc = await PlayerKyc.findOne({ where: { playerId } });
+        if (existingKyc || player.profileCompletion) {
             fs.unlinkSync(req.file.path);
             return res.status(400).json({
                 message: "Player KYC already captured"
             });
         }
 
-        let result;
-        try{
-            result = await cloudinary.uploader.upload(req.file.path, {resource_type: 'auto'})
-            fs.unlinkSync(req.file.path)
-        }catch(uploadError){
+        // Upload video to Cloudinary
+        let cloudinaryResult;
+        try {
+            cloudinaryResult = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
+            fs.unlinkSync(req.file.path); // Clean up the local file after upload
+        } catch (uploadError) {
             fs.unlinkSync(req.file.path);
             return res.status(400).json({
-                message: "error uploading video: " + uploadError.message
+                message: `Error uploading video: ${uploadError.message}`
             });
         }
-        const data =({
-            age,nationality,height,weight,preferredFoot,playingPosition,
-            phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,contactInfoOfCoaches,openToTrials,media:result.secure_url,followDiet,willingToRelocate,playerId
-        });
-        const playerDetails = await PlayerKyc.create(data);
+
+        // Prepare the data to be saved to the database
+        const playerKycData = {
+            age,
+            nationality,
+            height,
+            weight,
+            preferredFoot,
+            playingPosition,
+            phoneNumber,
+            homeAddress,
+            primaryPosition,
+            secondaryPosition,
+            currentClub,
+            strengths,
+            contactInfoOfCoaches,
+            openToTrials,
+            followDiet,
+            willingToRelocate,
+            media: cloudinaryResult.secure_url,
+            playerId
+        };
+
+        // Create a new PlayerKyc record
+        const playerDetails = await PlayerKyc.create(playerKycData);
+
+        // Update the player's profileCompletion status
         player.profileCompletion = true;
         await player.save();
 
-         return res.status(201).json({
-                message: "KYC completed successfully",
-                data: playerDetails
-            })
+        // Respond with success message
+        return res.status(201).json({
+            message: "KYC completed successfully",
+            data: playerDetails
+        });
+
     } catch (error) {
-        console.log(error.message)
-        //    if (req.file.path) {
-        //             // Unlink the file from our local storage
-        //             fs.unlinkSync(req.file.path)
-        //         }
-        res.status(500).json({
+        console.error(error.message); // Log error for debugging
         
-            message:"Unable to complete KYC" + error.message
-        })
+        // Clean up the uploaded file in case of an error
+        if (req.file && req.file.path) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        // Respond with an error message
+        return res.status(500).json({
+            message: `Unable to complete KYC: ${error.message}`
+        });
     }
 };
 
