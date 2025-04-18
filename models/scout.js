@@ -27,7 +27,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     profileCompletion: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      defaultValue: false
+    },
+    isAdmin:{
+      type: DataTypes.BOOLEAN,
+      defaultValue:false
     },
   }, {
     tableName: 'Scouts',

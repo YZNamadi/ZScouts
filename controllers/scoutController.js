@@ -28,7 +28,8 @@ const genToken = async (user) => {
         userId: user.id, 
         scoutId: user.scoutId, // Sequelize uses id
         fullname: user.fullname,
-        email: user.email
+        email: user.email,
+        isAdmin: user.isAdmin
       },
       process.env.JWT_SECRET,
       { expiresIn: '50m' }
@@ -238,30 +239,42 @@ const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword, confirmPassword } = req.body;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+  
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({ message: 'Both password fields are required' });
+    }
 
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    // Decode and verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      const message = err.name === 'TokenExpiredError' ? 'Token has expired' : 'Invalid token';
+      return res.status(400).json({ message });
+    }
+
+    // Find user
     const scout = await Scout.findOne({ where: { id: decoded.userId } });
-
-
     if (!scout) {
       return res.status(404).json({ message: 'Scout not found' });
     }
 
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({
-        message: 'Password does not match'
-      })
-    };
-
+    // Hash and save new password
     scout.password = await bcrypt.hash(newPassword, 10);
     await scout.save();
 
     res.status(200).json({ message: 'Password reset successful' });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Reset Password Error:", error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 // Change Password
 const changePassword = async (req, res) => {

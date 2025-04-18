@@ -26,7 +26,11 @@ module.exports = {
       },
       profileCompletion:{
         type: Sequelize.BOOLEAN,
-        defaultValue:false,
+        defaultValue:false
+      },
+      isAdmin:{
+        type: Sequelize.BOOLEAN,
+        defaultValue:false
       },
       createdAt: {
         allowNull: false,

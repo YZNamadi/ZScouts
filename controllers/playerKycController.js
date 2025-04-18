@@ -237,48 +237,56 @@ exports.deletePlayerInfo = async (req, res) => {
     }
   };
   
+  
+  exports.profilePic = async (req, res) => {
+    try {
+      const { id: playerId } = req.params;
+  
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Please upload a profile picture"
+        });
+      }
+  
+      const player = await PlayerKyc.findOne({ where: { playerId } });
+      if (!player) {
+        if (req.file.path && fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        return res.status(404).json({
+          message: "Player not found"
+        });
+      }
 
-exports.profilePic = async (req, res) => {
-  try {
-    const { id: playerId } = req.params;
-
-    if (!req.file) {
-      return res.status(400).json({
-        message: "Please upload a profile picture"
-      });
-    }
-
-    const player = await PlayerKyc.findOne({ where: { playerId } });
-    if (!player) {
-      if (req.file && req.file.path) {
+      const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'image' });
+  
+      if (req.file.path && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
-      return res.status(404).json({
-        message: "Player not found"
+
+      player.profilePic = result.secure_url;
+      await player.save();
+  
+      res.status(200).json({
+        message: "Profile picture successfully uploaded",
+        data: {
+          profilePic: result.secure_url
+        }
+      });
+  
+    } catch (error) {
+      console.error("Profile Pic Upload Error:", error.message);
+  
+      if (req.file?.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+  
+      res.status(500).json({
+        message: "Unable to upload player profile picture: " + error.message
       });
     }
-    const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'image'});
-
-    fs.unlinkSync(req.file.path);
-
-    player.profilePic = result.secure_url;
-    await player.save();
-
-    res.status(200).json({
-      message: "Profile picture successfully uploaded",
-      data: {
-        profilePic: result.secure_url
-      }
-    });
-
-  } catch (error) {
-    console.error("Profile Pic Upload Error:", error.message);
-    res.status(500).json({
-      message: "Unable to upload player profile picture: " + error.message
-    });
-  }
-};
-
+  };
+  
 
 exports.deleteProfilePic = async (req, res) => {
     try {
