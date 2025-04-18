@@ -74,3 +74,18 @@ exports.promoteToAdmin = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getAllScouts =async (req,res)=>{
+  try {
+      const allScouts = await Scout.findAll();
+
+      res.status(200).json({
+        message:"All Scout in Database",
+        data:allScouts,
+        total:allScouts.length
+      })
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

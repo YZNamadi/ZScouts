@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
+const {adminAuth}  = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
@@ -30,7 +31,7 @@ const adminController = require("../controllers/adminController");
  *       500:
  *         description: Internal server error
  */
-router.delete("/players/:id", adminController.deletePlayerAccount);
+router.delete("/players/:id", adminAuth, adminController.deletePlayerAccount);
 
 /**
  * @swagger
@@ -53,7 +54,7 @@ router.delete("/players/:id", adminController.deletePlayerAccount);
  *       500:
  *         description: Internal server error
  */
-router.delete("/scouts/:id", adminController.deleteScoutAccount);
+router.delete("/scouts/:id", adminAuth, adminController.deleteScoutAccount);
 
 /**
  * @swagger
@@ -76,29 +77,62 @@ router.delete("/scouts/:id", adminController.deleteScoutAccount);
  *       500:
  *         description: Internal server error
  */
-router.patch("/scouts/:id/verify", adminController.verifyScout);
-
+router.patch("/scouts/:id/verify", adminAuth, adminController.verifyScout);
 /**
  * @swagger
- * /players/{id}/makeAdmin:
- *   patch:
- *     summary: Promote a player to admin
+ * /scouts/allscouts:
+ *   get:
+ *     summary: Get all scouts (Admin only)
  *     tags: [Admin]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Player ID to promote
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Player promoted to admin successfully
- *       404:
- *         description: Player not found
+ *         description: A list of all scouts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: All Scout in Database
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "1"
+ *                       fullname:
+ *                         type: string
+ *                         example: "Alex Johnson"
+ *                       email:
+ *                         type: string
+ *                         example: "alex.johnson@example.com"
+ *                       isAdmin:
+ *                         type: boolean
+ *                         example: false
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 total:
+ *                   type: integer
+ *                   example: 3
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - User is not an admin
  *       500:
  *         description: Internal server error
  */
-router.patch("/players/:id/makeAdmin", adminController.promoteToAdmin);
+router.get('/allscouts', adminAuth, adminController.getAllScouts);
+
+router.patch("/players/:id/makeAdmin", adminAuth, adminController.promoteToAdmin);
+
 
 module.exports = router;

@@ -28,7 +28,9 @@ const genToken = (user) => {
       userId: user.id,
       scoutId: user.scoutId,
       fullname: user.fullname,
-      email: user.email
+      email: user.email,
+      isAdmin: user.isAdmin
+
     },
     process.env.JWT_SECRET,
     { expiresIn: "50m" }
@@ -497,6 +499,23 @@ const getOneVideoOfPlayer = async (req, res) => {
   }
 };
 
+const getAllPLayers =async (req,res)=>{
+  try {
+      const allPLayers = await Player.findAll();
+
+      res.status(200).json({
+        message:"All PLayers in Database",
+        data:allPLayers,
+        total:allPLayers.length
+      })
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
 
 module.exports = {
   signUp,
@@ -513,5 +532,6 @@ module.exports = {
   positionSearch,
   footSearch,
 getAllVideosByPlayer,
-getOneVideoOfPlayer
+getOneVideoOfPlayer,
+getAllPLayers
 };

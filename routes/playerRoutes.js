@@ -19,7 +19,8 @@ const {
   positionSearch,
   footSearch,
   getAllVideosByPlayer,
-  getOneVideoOfPlayer
+  getOneVideoOfPlayer,
+  getAllPLayers
 } = require("../controllers/playerController");
 
 // Standard player auth routes
@@ -302,46 +303,6 @@ router.get('/auth/google/login',
   }
 );
 
-/**
- * @swagger
- * tags:
- *   name: Player Discovery
- *   description: Search and filter players based on specific criteria
- */
-
-/**
- * @swagger
- * /api/players/search:
- *   get:
- *     summary: Search for players based on filters
- *     tags: [Player Discovery]
- *     parameters:
- *       - in: query
- *         name: position
- *         schema:
- *           type: string
- *         description: Filter players by primary position
- *       - in: query
- *         name: nationality
- *         schema:
- *           type: string
- *         description: Filter players by nationality
- *       - in: query
- *         name: minRating
- *         schema:
- *           type: integer
- *         description: Filter players by minimum average rating
- *       - in: query
- *         name: maxRating
- *         schema:
- *           type: integer
- *         description: Filter players by maximum average rating
- *     responses:
- *       200:
- *         description: List of players matching the filters
- *       500:
- *         description: Internal server error
- */
 router.get("/players/search", searchPlayers);
 
 /**
@@ -586,7 +547,7 @@ router.post('/filterfoot', footSearch);
 
 /**
  * @swagger
- * /player-vids/{id}:
+ * /api/players/player-vids/{id}:
  *   get:
  *     summary: Get all videos by player ID
  *     description: Returns a list of videos (media) associated with a specific player by their ID.
@@ -645,7 +606,7 @@ router.get('/player-vids/:id', getAllVideosByPlayer);
 
 /**
  * @swagger
- * /oneplayer-vid/{id}:
+ * /api/players/oneplayer-vid/{id}:
  *   get:
  *     summary: Get a single video of a player by ID
  *     description: Retrieves one video (media) for a specific player using their ID.
@@ -698,6 +659,56 @@ router.get('/player-vids/:id', getAllVideosByPlayer);
  *                   example: Internal Server Error
  */
 router.get('/oneplayer-vid/:id', getOneVideoOfPlayer);
+/**
+ * @swagger
+ * /api/players/scouts/allplayers:
+ *   get:
+ *     summary: Get all players in the database
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: A list of all players
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: All PLayers in Database
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "456"
+ *                       fullname:
+ *                         type: string
+ *                         example: "Jane Doe"
+ *                       email:
+ *                         type: string
+ *                         example: "jane@example.com"
+ *                       age:
+ *                         type: integer
+ *                         example: 21
+ *                       position:
+ *                         type: string
+ *                         example: "Midfielder"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 total:
+ *                   type: integer
+ *                   example: 5
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/allplayers', getAllPLayers);
 
 
 
