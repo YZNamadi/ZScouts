@@ -12,7 +12,7 @@ const {adminAuth}  = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
- * /players/{id}:
+ * /api/admin/players/{id}:
  *   delete:
  *     summary: Delete a player account
  *     tags: [Admin]
@@ -32,6 +32,7 @@ const {adminAuth}  = require('../middlewares/authMiddleware');
  *         description: Internal server error
  */
 router.delete("/players/:id", adminAuth, adminController.deletePlayerAccount);
+
 
 /**
  * @swagger
