@@ -460,7 +460,7 @@ const getAllVideosByPlayer = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "All videos of players in the Database",
+      message: `All of video of player`,
       data: playerKyc
     });
 
