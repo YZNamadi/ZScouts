@@ -36,7 +36,7 @@ router.delete("/players/:id", adminAuth, adminController.deletePlayerAccount);
 
 /**
  * @swagger
- * /scouts/{id}:
+ * /api/admin/scouts/{id}:
  *   delete:
  *     summary: Delete a scout account
  *     tags: [Admin]
@@ -59,7 +59,7 @@ router.delete("/scouts/:id", adminAuth, adminController.deleteScoutAccount);
 
 /**
  * @swagger
- * /scouts/{id}/verify:
+ * /api/admin/scouts/{id}/verify:
  *   patch:
  *     summary: Verify a scout
  *     tags: [Admin]
@@ -81,7 +81,7 @@ router.delete("/scouts/:id", adminAuth, adminController.deleteScoutAccount);
 router.patch("/scouts/:id/verify", adminAuth, adminController.verifyScout);
 /**
  * @swagger
- * /scouts/allscouts:
+ * /api/admin/scouts/allscouts:
  *   get:
  *     summary: Get all scouts (Admin only)
  *     tags: [Admin]
