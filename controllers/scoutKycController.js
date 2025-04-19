@@ -7,7 +7,7 @@ const fs = require('fs')
 
 exports.scoutInfo = async(req, res) => {
     try {
-        const {id: scoutId} = req.params;
+        const {id} = req.params;
         const {nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
             age, socialMediaProfile} = req.body;
 
@@ -17,7 +17,7 @@ exports.scoutInfo = async(req, res) => {
             });
         }
 
-        const scout = await Scout.findByPk(scoutId);
+        const scout = await Scout.findByPk(id);
         if (!scout) {
             fs.unlinkSync(req.file.path);
             return res.status(404).json({
@@ -25,7 +25,7 @@ exports.scoutInfo = async(req, res) => {
             });
         }
         
-        const existingKyc = await ScoutKyc.findOne({where:{scoutId}});
+        const existingKyc = await ScoutKyc.findOne({where:{id:id}});
         if (existingKyc || scout.profileCompletion) {
             fs.unlinkSync(req.file.path);
             return res.status(400).json({
@@ -82,12 +82,12 @@ exports.scoutInfo = async(req, res) => {
 
 exports.updateScoutInfo = async(req, res) => {
     try {
-        const {id: scoutId} = req.params;
+        const {id} = req.params;
         const {
             nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
             preferredAge, socialMediaProfile} = req.body;
 
-        const scout = await Scout.findByPk(scoutId);
+        const scout = await Scout.findByPk(id);
         if (!scout) {
             if (req.file && req.file.path) {
                 fs.unlinkSync(req.file.path);
@@ -97,8 +97,7 @@ exports.updateScoutInfo = async(req, res) => {
             });
         }
 
-        // Find existing scout KYC data
-        const existingScoutKyc = await ScoutKyc.findOne({where: { scoutId }});
+        const existingScoutKyc = await ScoutKyc.findOne({where: { id:id }});
         
         if (!existingScoutKyc) {
             if (req.file && req.file.path) {
@@ -120,10 +119,9 @@ exports.updateScoutInfo = async(req, res) => {
             socialMediaProfile: socialMediaProfile
         };
 
-        // If file is uploaded, process it and update the verification document
+        
         if (req.file) {
             try {
-                // First, delete the existing document from Cloudinary if it exists
                 const existingDocumentUrl = existingScoutKyc.verificationDocument;
                 if (existingDocumentUrl) {
      const fileExtension = existingDocumentUrl.split('.').pop();
@@ -132,11 +130,10 @@ exports.updateScoutInfo = async(req, res) => {
                     await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
                 }
 
-                // Upload the new document
                 const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
                 updateData.verificationDocument = result.secure_url;
                 
-                // Clean up local file
+                
                 fs.unlinkSync(req.file.path);
             } catch (uploadError) {
                 // if (req.file && req.file.path) {
@@ -156,7 +153,6 @@ exports.updateScoutInfo = async(req, res) => {
         });
     } catch (error) {
         console.log(error.message);
-        // Only try to delete the file if it exists
         if (req.file && req.file.path) {
             try {
                 fs.unlinkSync(req.file.path);
@@ -173,16 +169,16 @@ exports.updateScoutInfo = async(req, res) => {
 
 exports.deleteScoutInfo = async(req, res) => {
     try {
-        const { id:scoutId} = req.params;
+        const { id} = req.params;
 
-        const scout = await Scout.findByPk(scoutId);
+        const scout = await Scout.findByPk(id);
         if (!scout) {
             return res.status(404).json({
                 message: "Scout not found"
             });
         }
 
-        const scoutKyc = await ScoutKyc.findOne({where:{ scoutId }});
+        const scoutKyc = await ScoutKyc.findOne({where:{ id }});
 
         if (!scoutKyc) {
             return res.status(404).json({
@@ -212,9 +208,9 @@ exports.deleteScoutInfo = async(req, res) => {
 
 exports.profilePic = async (req, res) => {
     try {
-      const { id: scoutId } = req.params;
+      const { id} = req.params;
   
-      const scout = await Scout.findByPk(scoutId);
+      const scout = await Scout.findByPk(id);
       if (!scout) {
         if (req.file.path) {
           fs.unlinkSync(req.file.path); 

@@ -8,22 +8,20 @@ const fs = require('fs')
 
 exports.playerInfo = async (req, res) => {
     try {
-        const { id: playerId } = req.params;
+        const { id } = req.params;
         const { 
             age, nationality, height, weight, preferredFoot, playingPosition,
             phoneNumber, homeAddress, primaryPosition, secondaryPosition, currentClub,
             strengths, contactInfoOfCoaches, openToTrials, followDiet, willingToRelocate
         } = req.body;
 
-        // Check if the video file is uploaded
         if (!req.file) {
             return res.status(400).json({
                 message: "Please upload a short video showing your skills"
             });
         }
 
-        // Find the player in the database
-        const player = await Player.findByPk(playerId);
+        const player = await Player.findByPk(id);
         if (!player) {
             fs.unlinkSync(req.file.path);
             return res.status(404).json({
@@ -31,8 +29,7 @@ exports.playerInfo = async (req, res) => {
             });
         }
 
-        // Check if the player already has KYC data or has completed profile
-        const existingKyc = await PlayerKyc.findOne({ where: { playerId } });
+        const existingKyc = await PlayerKyc.findOne({ where: { id: id} });
         if (existingKyc || player.profileCompletion) {
             fs.unlinkSync(req.file.path);
             return res.status(400).json({
@@ -40,11 +37,10 @@ exports.playerInfo = async (req, res) => {
             });
         }
 
-        // Upload video to Cloudinary
         let cloudinaryResult;
         try {
             cloudinaryResult = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
-            fs.unlinkSync(req.file.path); // Clean up the local file after upload
+            fs.unlinkSync(req.file.path); 
         } catch (uploadError) {
             fs.unlinkSync(req.file.path);
             return res.status(400).json({
@@ -52,7 +48,6 @@ exports.playerInfo = async (req, res) => {
             });
         }
 
-        // Prepare the data to be saved to the database
         const playerKycData = {
             age,
             nationality,
@@ -71,31 +66,26 @@ exports.playerInfo = async (req, res) => {
             followDiet,
             willingToRelocate,
             media: cloudinaryResult.secure_url,
-            playerId
+            id
         };
 
-        // Create a new PlayerKyc record
         const playerDetails = await PlayerKyc.create(playerKycData);
 
-        // Update the player's profileCompletion status
         player.profileCompletion = true;
         await player.save();
 
-        // Respond with success message
         return res.status(201).json({
             message: "KYC completed successfully",
             data: playerDetails
         });
 
     } catch (error) {
-        console.error(error.message); // Log error for debugging
+        console.error(error.message);
         
-        // Clean up the uploaded file in case of an error
         if (req.file && req.file.path) {
             fs.unlinkSync(req.file.path);
         }
 
-        // Respond with an error message
         return res.status(500).json({
             message: `Unable to complete KYC: ${error.message}`
         });
@@ -105,13 +95,13 @@ exports.playerInfo = async (req, res) => {
 
 exports.updatePlayerInfo = async(req, res) => {
     try {
-        const {id: playerId} = req.params;
+        const {id} = req.params;
         const {
             age,nationality,height,weight,preferredFoot,playingPosition,
             phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
             strengths,contactInfoOfCoaches,openToTrials, followDiet,willingToRelocate} = req.body;
 
-        const player = await Player.findByPk(playerId);
+        const player = await Player.findByPk(id);
         if (!player) {
             if (req.file && req.file.path) {
                 fs.unlinkSync(req.file.path);
@@ -121,8 +111,7 @@ exports.updatePlayerInfo = async(req, res) => {
             });
         }
 
-        // Find existing player KYC data
-        const existingPlayerKyc = await PlayerKyc.findOne({where: { playerId }});
+        const existingPlayerKyc = await PlayerKyc.findOne({where: { id:id }});
         
         if (!existingPlayerKyc) {
             if (req.file && req.file.path) {
@@ -192,16 +181,16 @@ exports.updatePlayerInfo = async(req, res) => {
 
 exports.deletePlayerInfo = async (req, res) => {
     try {
-      const { id: playerId } = req.params;
+      const { id} = req.params;
   
-      const player = await Player.findByPk(playerId);
+      const player = await Player.findByPk(id);
       if (!player) {
         return res.status(404).json({
           message: "Player not found"
         });
       }
   
-      const playerKyc = await PlayerKyc.findOne({ where: { playerId } });
+      const playerKyc = await PlayerKyc.findOne({ where: { id:id } });
       if (!playerKyc) {
         return res.status(404).json({
           message: "Player profile not found"
@@ -240,15 +229,9 @@ exports.deletePlayerInfo = async (req, res) => {
   
   exports.profilePic = async (req, res) => {
     try {
-      const { id: playerId } = req.params;
+      const { id } = req.params;
   
-      if (!req.file) {
-        return res.status(400).json({
-          message: "Please upload a profile picture"
-        });
-      }
-  
-      const player = await PlayerKyc.findOne({ where: { playerId } });
+      const player = await PlayerKyc.findOne({ where: { id:id } });
       if (!player) {
         if (req.file.path && fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
@@ -290,9 +273,9 @@ exports.deletePlayerInfo = async (req, res) => {
 
 exports.deleteProfilePic = async (req, res) => {
     try {
-      const { id: playerId } = req.params;
+      const { id } = req.params;
   
-      const player = await PlayerKyc.findOne({ where: { playerId } });
+      const player = await PlayerKyc.findOne({ where: { id:id } });
   
       if (!player) {
         return res.status(404).json({
@@ -333,3 +316,46 @@ exports.deleteProfilePic = async (req, res) => {
   };
   
 
+  exports.videoUpload = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      const player = await PlayerKyc.findOne({ where: { id:id } });
+      if (!player) {
+        if (req.file.path && fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        return res.status(404).json({
+          message: "Player not found"
+        });
+      }
+
+      const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'video' });
+  
+      if (req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      player.videoUpload = result.secure_url;
+      await player.save();
+  
+      res.status(200).json({
+        message: "video successfully uploaded",
+        data: {
+          videoUpload: result.secure_url
+        }
+      });
+  
+    } catch (error) {
+      console.error("Profile Pic Upload Error:", error.message);
+  
+      if (req.file?.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+  
+      res.status(500).json({
+        message: "Unable to upload player profile picture: " + error.message
+      });
+    }
+  };
+  

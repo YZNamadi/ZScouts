@@ -83,6 +83,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('YES','NO'),
       allowNull:false
     },
+    profilePic:{
+      type: DataTypes.STRING,
+      allowoNull:false
+    },
+    videoUpload:{
+      type: DataTypes.STRING,
+      allowoNull:false
+    },
   }, {
     tableName: 'PlayerKycs',
     timestamps: true,
