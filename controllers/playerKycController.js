@@ -20,7 +20,6 @@ exports.playerInfo = async (req, res) => {
                 message: "Please upload a short video showing your skills"
             });
         }
-
         const player = await Player.findByPk(id);
         if (!player) {
             fs.unlinkSync(req.file.path);
@@ -66,7 +65,7 @@ exports.playerInfo = async (req, res) => {
             followDiet,
             willingToRelocate,
             media: cloudinaryResult.secure_url,
-            id
+            playerId: id
         };
 
         const playerDetails = await PlayerKyc.create(playerKycData);
@@ -80,11 +79,12 @@ exports.playerInfo = async (req, res) => {
         });
 
     } catch (error) {
+      console.log(error.message)
         console.error(error.message);
         
-        if (req.file && req.file.path) {
-            fs.unlinkSync(req.file.path);
-        }
+        // if (req.file && req.file.path) {
+        //     fs.unlinkSync(req.file.path);
+        // }
 
         return res.status(500).json({
             message: `Unable to complete KYC: ${error.message}`
