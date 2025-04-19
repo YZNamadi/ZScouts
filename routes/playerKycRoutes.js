@@ -8,7 +8,7 @@ const router = require('express').Router();
 
 /**
  * @swagger
- * /api/v1/playerkyc/{id}:
+ * api/v1/playerkyc/{id}:
  *   post:
  *     summary: Submit player KYC information
  *     tags: [Player KYC]
@@ -31,6 +31,7 @@ const router = require('express').Router();
  *               - height
  *               - weight
  *               - preferredFoot
+ *               - playingPosition
  *               - phoneNumber
  *               - homeAddress
  *               - primaryPosition
@@ -59,7 +60,10 @@ const router = require('express').Router();
  *               preferredFoot:
  *                 type: string
  *                 enum: [Left, Right, Both]
- *                 description: preferred foot of the player
+ *                 description: Preferred foot of the player
+ *               playingPosition:
+ *                 type: string
+ *                 description: General playing position (e.g. Midfielder)
  *               phoneNumber:
  *                 type: string
  *                 description: Player's contact number
