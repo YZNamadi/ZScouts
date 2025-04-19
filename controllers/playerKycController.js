@@ -81,10 +81,6 @@ exports.playerInfo = async (req, res) => {
     } catch (error) {
       console.log(error.message)
         console.error(error.message);
-        
-        // if (req.file && req.file.path) {
-        //     fs.unlinkSync(req.file.path);
-        // }
 
         return res.status(500).json({
             message: `Unable to complete KYC: ${error.message}`
