@@ -1,4 +1,4 @@
-const { playerInfo, updatePlayerInfo, deletePlayerInfo, profilePic, deleteProfilePic } = require('../controllers/playerKycController');
+const { playerInfo, updatePlayerInfo, deletePlayerInfo, profilePic, deleteProfilePic, videoUpload } = require('../controllers/playerKycController');
 const playerController = require('../controllers/playerController');
 const upload = require('../utils/multer');
 
@@ -389,6 +389,83 @@ router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
  */
 router.delete('/delete-profile-pic/:id', deleteProfilePic);
 
+/**
+ * @swagger
+ * /api/v1/videoupload/{id}:
+ *   post:
+ *     summary: Upload player KYC video
+ *     description: Uploads a video for a specific player using their ID. Requires a multipart/form-data request with a video file.
+ *     tags:
+ *       - Players
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Player KYC ID
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - videoupload
+ *             properties:
+ *               videoupload:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Video successfully uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Video successfully uploaded
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     videoupload:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/video/upload/v123456789/video.mp4
+ *       400:
+ *         description: No video uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Please upload a video
+ *       404:
+ *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
+ *       500:
+ *         description: Internal server error during upload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to upload player profile picture: <error message>"
+ */
 
+router.post('/videoupload/:id', upload.single('videoupload'), videoUpload);
 
 module.exports = router
