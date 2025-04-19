@@ -8,7 +8,7 @@ const router = require('express').Router();
 
 /**
  * @swagger
- * api/v1/playerkyc/{id}:
+ * /playerkyc/{id}:
  *   post:
  *     summary: Submit player KYC information
  *     tags: [Player KYC]
@@ -117,7 +117,7 @@ const router = require('express').Router();
  *                   type: object
  *                   description: Player KYC details
  *       400:
- *         description: Bad request – Missing required fields or media file
+ *         description: Bad request – Missing required fields, media file, or KYC already submitted
  *       404:
  *         description: Player not found
  *       500:
