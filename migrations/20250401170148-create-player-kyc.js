@@ -16,6 +16,10 @@ module.exports = {
         allowNull:false
 
       },
+      gender:{
+        type: Sequelize.ENUM('male', 'female'),
+        allowNull:false
+      },
       nationality: {
         type: Sequelize.STRING,
         allowNull:false,
@@ -47,15 +51,15 @@ module.exports = {
         allowNull:false
       },
       secondaryPosition: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('GK','DEF','MF','ST'),
         allowNull:false
       },
       currentClub: {
         type: Sequelize.STRING,
         allowNull:false
       },
-      strengths: {
-        type: Sequelize.STRING,
+      ability: {
+        type: Sequelize.ENUM('dribbling', 'passing', 'shooting', 'defending', 'stamina', 'speed'),
         allowNull:false
       },
       contactInfoOfCoaches: {
@@ -66,7 +70,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull:false
       },
-      opentotrials: {
+      openToTrials: {
         type: Sequelize.ENUM('YES','NO'),
         allowNull:false
       },

@@ -9,8 +9,10 @@ const scoutAuthController = require("../controllers/scoutController");
  * @swagger
  * /api/scouts/register:
  *   post:
- *     summary: Onboard a new scout
- *     tags: [Scouts]
+ *     summary: Register a new scout
+ *     description: Creates a new scout account and sends a verification email.
+ *     tags:
+ *       - Scouts
  *     requestBody:
  *       required: true
  *       content:
@@ -25,15 +27,55 @@ const scoutAuthController = require("../controllers/scoutController");
  *             properties:
  *               fullname:
  *                 type: string
+ *                 example: "Jane Doe"
  *               email:
  *                 type: string
+ *                 format: email
+ *                 example: "jane.doe@example.com"
  *               password:
  *                 type: string
+ *                 format: password
+ *                 example: "StrongPassword123"
  *               confirmPassword:
  *                 type: string
+ *                 format: password
+ *                 example: "StrongPassword123"
  *     responses:
  *       201:
- *         description: Scout registered successfully and verification email sent.
+ *         description: Scout account created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Check your email: jane.doe@example.com to verify your scout account."
+ *                 data:
+ *                   $ref: '#/components/schemas/Scout'
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         description: Validation error or email already in use
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: The email jane.doe@example.com is already associated with an account. Please use a different email.
+ *       500:
+ *         description: Internal server error during registration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong: <error message>"
  */
 router.post("/register", registerValidation, scoutAuthController.signUp);
 

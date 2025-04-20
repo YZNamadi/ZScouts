@@ -10,10 +10,24 @@ exports.playerInfo = async (req, res) => {
     try {
         const { id } = req.params;
         const { 
-            age, nationality, height, weight, preferredFoot, playingPosition,
-            phoneNumber, homeAddress, primaryPosition, secondaryPosition, currentClub,
-            strengths, contactInfoOfCoaches, openToTrials, followDiet, willingToRelocate
+          age,
+          gender,
+          nationality,
+          height,
+          weight,
+          preferredFoot,
+          phoneNumber,
+          homeAddress,
+          primaryPosition,
+          secondaryPosition,
+          currentClub,
+          ability,
+          contactInfoOfCoaches,
+          openToTrials,
+          followDiet,
+          willingToRelocate
         } = req.body;
+        console.log('Received KYC data:', req.body)
 
         if (!req.file) {
             return res.status(400).json({
@@ -48,24 +62,9 @@ exports.playerInfo = async (req, res) => {
         }
 
         const playerKycData = {
-            age,
-            nationality,
-            height,
-            weight,
-            preferredFoot,
-            playingPosition,
-            phoneNumber,
-            homeAddress,
-            primaryPosition,
-            secondaryPosition,
-            currentClub,
-            strengths,
-            contactInfoOfCoaches,
-            openToTrials,
-            followDiet,
-            willingToRelocate,
-            media: cloudinaryResult.secure_url,
-            playerId: id
+    age,gender,nationality,height,weight,preferredFoot,phoneNumber,homeAddress,primaryPosition,secondaryPosition,
+    currentClub,ability, contactInfoOfCoaches,openToTrials,followDiet,willingToRelocate,media: cloudinaryResult.secure_url,
+      playerId: id
         };
 
         const playerDetails = await PlayerKyc.create(playerKycData);
@@ -93,9 +92,8 @@ exports.updatePlayerInfo = async(req, res) => {
     try {
         const {id} = req.params;
         const {
-            age,nationality,height,weight,preferredFoot,playingPosition,
-            phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,contactInfoOfCoaches,openToTrials, followDiet,willingToRelocate} = req.body;
+          age,gender,nationality,height,weight,preferredFoot,phoneNumber,homeAddress,primaryPosition,secondaryPosition,
+          currentClub,ability, contactInfoOfCoaches,openToTrials,followDiet,willingToRelocate} = req.body;
 
         const player = await Player.findByPk(id);
         if (!player) {
@@ -119,15 +117,13 @@ exports.updatePlayerInfo = async(req, res) => {
         }
 
         let updateData = {
-            age,nationality,height,weight,preferredFoot,playingPosition,
-            phoneNumber,homeAddress,primaryPosition,secondaryPosition,currentClub,
-            strengths,contactInfoOfCoaches,openToTrials, followDiet,willingToRelocate
+          age,gender,nationality,height,weight,preferredFoot,phoneNumber,homeAddress,primaryPosition,secondaryPosition,
+          currentClub,ability, contactInfoOfCoaches,openToTrials,followDiet,willingToRelocate,media: cloudinaryResult.secure_url,
+            playerId: id
         };
 
-        // If file is uploaded, process it and update the verification document
         if (req.file) {
             try {
-                // First, delete the existing document from Cloudinary if it exists
                 const existingDocumentUrl = existingPlayerKyc.media;
                 if (existingDocumentUrl) {
                     const fileExtension = existingDocumentUrl.split('.').pop();
@@ -137,7 +133,6 @@ exports.updatePlayerInfo = async(req, res) => {
                     await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
                 }
 
-                // Upload the new document
                 const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
                 updateData.media = result.secure_url;
                 
@@ -312,46 +307,54 @@ exports.deleteProfilePic = async (req, res) => {
   };
   
 
-  exports.videoUpload = async (req, res) => {
-    try {
-      const { id } = req.params;
   
-      const player = await PlayerKyc.findOne({ where: { id:id } });
-      if (!player) {
-        if (req.file.path && fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
-        }
-        return res.status(404).json({
-          message: "Player not found"
-        });
-      }
 
-      const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'video' });
-  
+exports.videoUpload = async (req, res) => {
+  try {
+    
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const { id } = req.params;
+    const player = await PlayerKyc.findOne({ where: { id: id } });
+
+    if (!player) {
+      
       if (req.file.path && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
-
-      player.videoUpload = result.secure_url;
-      await player.save();
-  
-      res.status(200).json({
-        message: "video successfully uploaded",
-        data: {
-          videoUpload: result.secure_url
-        }
-      });
-  
-    } catch (error) {
-      console.error("Profile Pic Upload Error:", error.message);
-  
-      if (req.file?.path && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-  
-      res.status(500).json({
-        message: "Unable to upload player profile picture: " + error.message
+      return res.status(404).json({
+        message: "Player not found"
       });
     }
-  };
+
+    const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'video' });
+
+    if (req.file.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    player.videoUpload = result.secure_url;
+    await player.save();
+
+    res.status(200).json({
+      message: "Video successfully uploaded",
+      data: {
+        videoUpload: result.secure_url
+      }
+    });
+
+  } catch (error) {
+    console.error("Video Upload Error:", error.message);
+
   
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).json({
+      message: "Unable to upload player video: " + error.message
+    });
+  }
+};

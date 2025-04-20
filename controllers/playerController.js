@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config();
-const { Player, PlayerKyc } = require('../models');
+const { Player, PlayerKyc, Scout} = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -10,6 +10,7 @@ const {reset} = require('../utils/mailTemplates');
 const  {verify}  = require('../utils/mailTemplates');
 const {resendVerifyEmail} = require('../utils/mailTemplates');
 const { Op } = require("sequelize");
+
 
 
 // Create a nodemailer transporter
@@ -27,6 +28,7 @@ const genToken = (user) => {
     {
       userId: user.id,
       scoutId: user.scoutId,
+      role: user.role,
       fullname: user.fullname,
       email: user.email,
       isAdmin: user.isAdmin
@@ -49,8 +51,10 @@ const signUp = async (req, res) => {
       return res.status(400).json({message: "password does not match"})
     }
     const existingPlayer = await Player.findOne({ where: { email: email.toLowerCase() } });
-    if (existingPlayer) {
-      return res.status(400).json({ message: `Player with this email: ${email} already exists.` });
+    const existingScout = await Scout.findOne({ where: { email: email.toLowerCase() } });
+
+    if (existingPlayer || existingScout) {
+      return res.status(400).json({ message: `The email ${email} is already associated with an account. Please use a different email.` });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -63,7 +67,7 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify_player/${token}`;
+    const verificationLink =`${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
     const firstName =player.fullname.split(" ")[0];
     const mailOptions = {
       from: process.env.SENDER_EMAIL,

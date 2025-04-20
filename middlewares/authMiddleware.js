@@ -1,6 +1,7 @@
 const { Player } = require("../models");
 const { Scout } = require("../models");
 const jwt = require("jsonwebtoken");
+require('dotenv').config();
 
 exports.authenticate = async (req, res, next) => {
   try {

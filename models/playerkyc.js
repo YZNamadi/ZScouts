@@ -21,13 +21,17 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
 
     },
+    gender:{
+      type: DataTypes.ENUM('male', 'female'),
+      allowNull:false
+    },
     nationality: {
       type: DataTypes.STRING,
       allowNull:false,
       defaultValue:"Nigerian",
 
     },
-    height: {
+    height:{
       type: DataTypes.STRING,
       allowNull:false
     },
@@ -36,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     preferredFoot: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('left', 'right', 'both'),
       allowNull:false
     },
     phoneNumber: {
@@ -52,15 +56,15 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     secondaryPosition: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('GK','DEF','MF','ST'),
       allowNull:false
     },
     currentClub: {
       type: DataTypes.STRING,
       allowNull:false
     },
-    strengths: {
-      type: DataTypes.STRING,
+    ability:{
+      type: DataTypes.ENUM('dribbling', 'passing', 'shooting', 'defending', 'stamina', 'speed'),
       allowNull:false
     },
     contactInfoOfCoaches: {
@@ -71,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false
     },
-    openToTrials: {
+    openToTrials:{
       type: DataTypes.ENUM('YES','NO'),
       allowNull:false
     },

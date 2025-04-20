@@ -3,8 +3,28 @@ module.exports = (sequelize, DataTypes) => {
     id: {
       allowNull: false,
       primaryKey: true,
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
+    },
+    playerId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'Players',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+    scoutId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'Scouts',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
     },
     email: {
       type: DataTypes.STRING,
@@ -31,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
     paymentDate: {
       type: DataTypes.STRING,
       allowNull:false
+    },
+    upgradeToPremium:{
+      type: DataTypes.STRING,
+      defaultValue: false
     },
   }, {
     tableName: 'Transactions',

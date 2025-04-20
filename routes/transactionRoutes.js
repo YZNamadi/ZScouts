@@ -1,40 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const transactionController = require("../controllers/transactionController");
-
-/**
- * @swagger
- * tags:
- *   name: Transactions
- *   description: Payment processing and transaction verification
- */
+const { initializePayment, verifyPayment } = require("../controllers/transactionController");
+const verifyToken = require('../middlewares/authtransaction');
 
 /**
  * @swagger
  * /api/transactions/initialize:
  *   post:
- *     summary: Initialize a new payment transaction
- *     tags: [Transactions]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - name
- *               - amount
- *             properties:
- *               email:
- *                 type: string
- *                 example: user@example.com
- *               name:
- *                 type: string
- *                 example: John Doe
- *               amount:
- *                 type: number
- *                 example: 5000
+ *     summary: Initialize payment for a Player or Scout
+ *     description: Initializes payment for a Player (₦3,000) or Scout (₦15,000) based on the user's role.
+ *     tags:
+ *       - Transaction
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Payment initialized successfully
@@ -45,32 +23,56 @@ const transactionController = require("../controllers/transactionController");
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Payment initialized successfully
+ *                   example: "Payment Initialized Successfully"
  *                 data:
  *                   type: object
  *                   properties:
  *                     reference:
  *                       type: string
- *                       example: TCA-AF-17122024123456
+ *                       example: "TCA-AF-92KD8L7SDFR0"
  *                     checkout_url:
  *                       type: string
- *                       example: "https://checkout.korapay.com/some-checkout-link"
+ *                       example: "https://checkout.korapay.com/checkout/xyz123"
+ *       400:
+ *         description: Invalid role or user not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid role"
+ *       500:
+ *         description: Internal server error during payment initialization
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to initialize payment: error message here"
  */
-router.post("/initialize", transactionController.initializePayment);
-
+router.post("/initialize", verifyToken, initializePayment);
 /**
  * @swagger
  * /api/transactions/verify:
  *   get:
- *     summary: Verify a payment transaction
- *     tags: [Transactions]
+ *     summary: Verify a payment using Korapay reference
+ *     description: Verifies the status of a payment using the provided reference from Korapay.
+ *     tags:
+ *       - Transaction
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: reference
  *         required: true
+ *         description: The reference string returned by Korapay during payment initialization
  *         schema:
  *           type: string
- *         description: The reference ID of the payment transaction
+ *           example: TCA-AF-FoTQ4ZaITSd
  *     responses:
  *       200:
  *         description: Payment verified successfully
@@ -82,15 +84,37 @@ router.post("/initialize", transactionController.initializePayment);
  *                 message:
  *                   type: string
  *                   example: Payment Verified Successfully
- *                 data:
- *                   type: object
  *       400:
  *         description: Payment verification failed
- *       404:
- *         description: Payment record not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Payment Verification Failed
+ *       401:
+ *         description: Unauthorized - token missing or invalid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No token provided
  *       500:
- *         description: Internal server error
+ *         description: Internal server error while verifying payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  */
-router.get("/verify", transactionController.verifyPayment);
+router.get("/verify", verifyToken, verifyPayment);
 
 module.exports = router;

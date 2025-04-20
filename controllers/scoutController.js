@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config();
-const { Scout, ScoutKyc } = require('../models'); 
+const { Scout, ScoutKyc, Player } = require('../models'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {reset} = require('../utils/mailTemplates');
@@ -28,6 +28,7 @@ const genToken = async (user) => {
         userId: user.id, 
         scoutId: user.scoutId, // Sequelize uses id
         fullname: user.fullname,
+        role: user.role,  
         email: user.email,
         isAdmin: user.isAdmin
       },
@@ -51,17 +52,17 @@ const signUp = async (req, res) => {
     if(password !== confirmPassword){
       return res.status(400).json({message: "password does not match"})
     }
-    // Use where clause in findOne:
+    
+    const existingPlayer = await Player.findOne({ where: { email: email.toLowerCase() } });
     const existingScout = await Scout.findOne({ where: { email: email.toLowerCase() } });
 
-    if (existingScout) {
-      return res.status(400).json({ message: `Scout with email: ${email} already exists.` });
+    if (existingPlayer || existingScout) {
+      return res.status(400).json({ message: `The email ${email} is already associated with an account. Please use a different email.` });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '50m' });
 
-    // Create new scout using Sequelize's create method
     const scout = await Scout.create({
       fullname,
       email: email.toLowerCase(),
@@ -69,8 +70,8 @@ const signUp = async (req, res) => {
       isVerified: false,
     });
 
-    const verificationLink = `https://z-scoutsf.vercel.app/email_verify/${token}`;
-    const firstName =scout.fullname.split(' ')[0]; // Get the first name from the full name
+    const verificationLink =  `${req.protocol}://${req.get('host')}/api/scouts/verify-email/${token}`;
+    const firstName =scout.fullname.split(' ')[0]; 
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
