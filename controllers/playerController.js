@@ -67,7 +67,7 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    const verificationLink =`${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
+    const verificationLink =`https://z-scoutsf.vercel.app/email_verify_player/${token}`;
     const firstName =player.fullname.split(" ")[0];
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
