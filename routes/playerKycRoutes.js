@@ -4,21 +4,23 @@ const upload = require('../utils/multer');
 
 const router = require('express').Router();
 
-
-
 /**
  * @swagger
- * /playerkyc/{id}:
+ * /api/v1/playerkyc/{id}:
  *   post:
  *     summary: Submit player KYC information
- *     tags: [Player KYC]
+ *     tags:
+ *       - Players KYC
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: UUID of the player
  *         schema:
  *           type: string
- *         description: Player ID to associate with the KYC information
+ *           format: uuid
  *     requestBody:
  *       required: true
  *       content:
@@ -27,17 +29,17 @@ const router = require('express').Router();
  *             type: object
  *             required:
  *               - age
+ *               - gender
  *               - nationality
  *               - height
  *               - weight
  *               - preferredFoot
- *               - playingPosition
  *               - phoneNumber
  *               - homeAddress
  *               - primaryPosition
  *               - secondaryPosition
  *               - currentClub
- *               - strengths
+ *               - ability
  *               - contactInfoOfCoaches
  *               - openToTrials
  *               - followDiet
@@ -46,65 +48,51 @@ const router = require('express').Router();
  *             properties:
  *               age:
  *                 type: string
- *                 description: Age of the player
+ *               gender:
+ *                 type: string
+ *                 enum: [male, female]
  *               nationality:
  *                 type: string
- *                 default: Nigerian
- *                 description: Nationality of the player
  *               height:
  *                 type: string
- *                 description: Height of the player
  *               weight:
  *                 type: string
- *                 description: Weight of the player
  *               preferredFoot:
  *                 type: string
- *                 enum: [Left, Right, Both]
- *                 description: Preferred foot of the player
- *               playingPosition:
- *                 type: string
- *                 description: General playing position (e.g. Midfielder)
+ *                 enum: [left, right, both]
  *               phoneNumber:
  *                 type: string
- *                 description: Player's contact number
  *               homeAddress:
  *                 type: string
- *                 description: Player's home address
  *               primaryPosition:
  *                 type: string
  *                 enum: [GK, DEF, MF, ST]
- *                 description: Primary position of the player
  *               secondaryPosition:
  *                 type: string
- *                 description: Secondary position of the player
+ *                 enum: [GK, DEF, MF, ST]
  *               currentClub:
  *                 type: string
- *                 description: Current club of the player
- *               strengths:
+ *               ability:
  *                 type: string
- *                 description: Player's strengths
+ *                 enum: [dribbling, passing, shooting, defending, stamina, speed]
  *               contactInfoOfCoaches:
  *                 type: string
- *                 description: Contact details of coaches or references
  *               openToTrials:
  *                 type: string
  *                 enum: [YES, NO]
- *                 description: Indicates if player is open to trials
  *               followDiet:
  *                 type: string
  *                 enum: [YES, NO]
- *                 description: Indicates if player follows a professional diet
  *               willingToRelocate:
  *                 type: string
  *                 enum: [YES, NO]
- *                 description: Indicates if player is willing to relocate
  *               media:
  *                 type: string
  *                 format: binary
- *                 description: Upload a short video showcasing the player's skills
+ *                 description: Upload a short video showing player skills
  *     responses:
  *       201:
- *         description: KYC information submitted successfully
+ *         description: KYC completed successfully
  *         content:
  *           application/json:
  *             schema:
@@ -115,13 +103,36 @@ const router = require('express').Router();
  *                   example: KYC completed successfully
  *                 data:
  *                   type: object
- *                   description: Player KYC details
  *       400:
- *         description: Bad request – Missing required fields, media file, or KYC already submitted
+ *         description: Invalid input or KYC already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player KYC already captured
  *       404:
  *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
  *       500:
- *         description: Internal server error
+ *         description: Server error during KYC processing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to complete KYC: error details"
  */
 router.post('/playerkyc/:id', upload.single('media'), playerInfo);
 
@@ -130,7 +141,8 @@ router.post('/playerkyc/:id', upload.single('media'), playerInfo);
  * /api/v1/players/{id}:
  *   put:
  *     summary: Update player KYC information
- *     tags: [Player KYC]
+ *     tags:
+ *       - Players KYC
  *     parameters:
  *       - in: path
  *         name: id
@@ -201,10 +213,34 @@ router.post('/playerkyc/:id', upload.single('media'), playerInfo);
  *                   description: Updated player KYC info
  *       400:
  *         description: Error during file upload or validation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid file or input
  *       404:
  *         description: Player or profile not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Player not found
  *       500:
  *         description: Internal server error while updating profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to update player KYC: error details"
  */
 router.put('/players/:id', upload.single('media'),updatePlayerInfo);
 
@@ -213,7 +249,8 @@ router.put('/players/:id', upload.single('media'),updatePlayerInfo);
  * /api/v1/playerskyc/{id}:
  *   delete:
  *     summary: Delete player KYC profile
- *     tags: [Player KYC]
+ *     tags:
+ *       - Players KYC
  *     parameters:
  *       - in: path
  *         name: id
@@ -251,7 +288,7 @@ router.put('/players/:id', upload.single('media'),updatePlayerInfo);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Unable to delete player profile: [error details]"
+ *                   example: "Unable to delete player profile: error details"
  */
 router.delete('/playerskyc/:id/', deletePlayerInfo);
 
@@ -259,33 +296,27 @@ router.delete('/playerskyc/:id/', deletePlayerInfo);
  * @swagger
  * /api/v1/profilepic/{id}:
  *   post:
- *     summary: Upload player profile picture
- *     description: Uploads a profile picture for a specific player using their ID. Requires a multipart/form-data request with an image file.
+ *     summary: Upload profile picture for a player
  *     tags:
- *       - Players
+ *       - Players KYC
+ *     consumes:
+ *       - multipart/form-data
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Player ID
+ *         description: UUID of the PlayerKyc record
  *         schema:
  *           type: string
- *           example: "1"
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - profilepic
- *             properties:
- *               profilepic:
- *                 type: string
- *                 format: binary
+ *           format: uuid
+ *       - in: formData
+ *         name: profilepic
+ *         type: file
+ *         required: true
+ *         description: The profile picture image to upload
  *     responses:
  *       200:
- *         description: Profile picture successfully uploaded
+ *         description: Profile picture uploaded successfully
  *         content:
  *           application/json:
  *             schema:
@@ -299,17 +330,8 @@ router.delete('/playerskyc/:id/', deletePlayerInfo);
  *                   properties:
  *                     profilePic:
  *                       type: string
- *                       example: https://res.cloudinary.com/demo/image/upload/v123456789/profile.jpg
- *       400:
- *         description: No profile picture uploaded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Please upload a profile picture
+ *                       format: uri
+ *                       example: https://res.cloudinary.com/your-cloud/image/upload/v123456789/profile.jpg
  *       404:
  *         description: Player not found
  *         content:
@@ -321,7 +343,7 @@ router.delete('/playerskyc/:id/', deletePlayerInfo);
  *                   type: string
  *                   example: Player not found
  *       500:
- *         description: Internal server error during upload
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:
@@ -329,7 +351,7 @@ router.delete('/playerskyc/:id/', deletePlayerInfo);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Unable to upload player profile picture: <error message>"
+ *                   example: "Unable to upload player profile picture: error message"
  */
 router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
 
@@ -340,7 +362,7 @@ router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
  *     summary: Delete a player's profile picture
  *     description: Deletes the profile picture of a specific player by their ID from Cloudinary.
  *     tags:
- *       - [Players]
+ *       - Players KYC
  *     parameters:
  *       - in: path
  *         name: id
@@ -392,38 +414,34 @@ router.post('/profilepic/:id', upload.single('profilepic'), profilePic);
  *                   example: "Unable to delete profile picture: <error message>"
  */
 router.delete('/delete-profile-pic/:id', deleteProfilePic);
-
 /**
  * @swagger
  * /api/v1/videoupload/{id}:
  *   post:
- *     summary: Upload player KYC video
- *     description: Uploads a video for a specific player using their ID. Requires a multipart/form-data request with a video file.
- *     tags:
- *       - Players
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: Player KYC ID
- *         schema:
- *           type: string
- *           example: "1"
+ *     summary: Upload video for a player's KYC
+ *     tags: ["Players KYC"]
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - videoupload
  *             properties:
- *               videoupload:
+ *               video:
  *                 type: string
  *                 format: binary
+ *                 description: "Select a video file showing the player's skills (e.g., dribbling, passing, shooting). Accepted formats: mp4, avi, mkv."
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: UUID of the PlayerKyc record
+ *         schema:
+ *           type: string
+ *           format: uuid
  *     responses:
  *       200:
- *         description: Video successfully uploaded
+ *         description: Video uploaded successfully
  *         content:
  *           application/json:
  *             schema:
@@ -435,11 +453,12 @@ router.delete('/delete-profile-pic/:id', deleteProfilePic);
  *                 data:
  *                   type: object
  *                   properties:
- *                     videoupload:
+ *                     videoUpload:
  *                       type: string
- *                       example: https://res.cloudinary.com/demo/video/upload/v123456789/video.mp4
+ *                       format: uri
+ *                       example: https://res.cloudinary.com/your-cloud/video/upload/v123456789/skillshowcase.mp4
  *       400:
- *         description: No video uploaded
+ *         description: No file uploaded
  *         content:
  *           application/json:
  *             schema:
@@ -447,7 +466,7 @@ router.delete('/delete-profile-pic/:id', deleteProfilePic);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Please upload a video
+ *                   example: "No file uploaded"
  *       404:
  *         description: Player not found
  *         content:
@@ -457,9 +476,9 @@ router.delete('/delete-profile-pic/:id', deleteProfilePic);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Player not found
+ *                   example: "Player not found"
  *       500:
- *         description: Internal server error during upload
+ *         description: Server error while uploading video
  *         content:
  *           application/json:
  *             schema:
@@ -467,9 +486,8 @@ router.delete('/delete-profile-pic/:id', deleteProfilePic);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Unable to upload player profile picture: <error message>"
+ *                   example: "Unable to upload player video: error message"
  */
-
-router.post('/videoupload/:id', upload.single('videoupload'), videoUpload);
+router.post('/videoupload/:id', upload.single('video'), videoUpload);
 
 module.exports = router

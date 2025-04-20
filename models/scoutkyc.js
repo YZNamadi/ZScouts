@@ -16,9 +16,13 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     },
-    nationality: {
+    gender:{
+      type: DataTypes.ENUM('male', 'female'),
+      allowNull:false
+    },
+    nationality:{
       type: DataTypes.STRING,
-      allowNull:false,
+      allowNull:false
     },
     phoneNumber: {
       type: DataTypes.STRING,
@@ -33,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     scoutingRole: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('video scout','talent scout', 'technical scout', 'internationl scout', 'first team scout'), 
       allowNull:false
     },
     league: {
@@ -41,14 +45,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     preferredPosition: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('GK','DEF','MF','ST'),
       allowNull:false
     },
     age: {
-      type: DataTypes.STRING,
-      allowNull:false
-    },
-    socialMediaProfile: {
       type: DataTypes.STRING,
       allowNull:false
     },

@@ -29,8 +29,10 @@ const {
  * @swagger
  * /api/players/register:
  *   post:
- *     summary: Onboard a new player
- *     tags: [Players]
+ *     summary: Register a new player
+ *     description: Registers a new player with their email, password, and fullname. Sends a verification email to the player.
+ *     tags:
+ *       - Players
  *     requestBody:
  *       required: true
  *       content:
@@ -45,15 +47,75 @@ const {
  *             properties:
  *               fullname:
  *                 type: string
+ *                 example: "John Doe"
  *               email:
  *                 type: string
+ *                 example: "john.doe@example.com"
  *               password:
  *                 type: string
+ *                 example: "password123"
  *               confirmPassword:
  *                 type: string
+ *                 example: "password123"
  *     responses:
  *       201:
- *         description: Player registered successfully and verification email sent.
+ *         description: Player successfully registered and verification email sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Check your email: john.doe@example.com to verify your account."
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "b67d58a4-ffb1-45c8-ae38-f21c9b6a7849"
+ *                     fullname:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "john.doe@example.com"
+ *                     isVerified:
+ *                       type: boolean
+ *                       example: false
+ *       400:
+ *         description: Bad Request - Validation failed or email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "password does not match"
+ *             examples:
+ *               passwordMismatch:
+ *                 summary: Password mismatch
+ *                 value:
+ *                   message: "password does not match"
+ *               emailExists:
+ *                 summary: Email already exists
+ *                 value:
+ *                   message: "The email john.doe@example.com is already associated with an account. Please use a different email."
+ *               missingFields:
+ *                 summary: Required fields missing
+ *                 value:
+ *                   message: "fullname, email, and password are required."
+ *       500:
+ *         description: Internal server error during registration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Signup Error: <error message>"
  */
 router.post("/register", registerValidation,signUp);
 

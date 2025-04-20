@@ -41,6 +41,10 @@ db.Player.hasOne(db.PlayerKyc, { foreignKey: 'playerId', as: 'playerKyc' });
 db.PlayerKyc.belongsTo(db.Player, { foreignKey: 'playerId', as: 'player' });
 db.Scout.hasOne(db.ScoutKyc, { foreignKey: 'scoutId', as: 'scoutKyc' });
 db.ScoutKyc.belongsTo(db.Scout, { foreignKey: 'scoutId', as: 'scout' });
+db.Scout.hasMany(db.Transaction, { foreignKey: 'scoutId', as: 'transactions' });
+db.Transaction.belongsTo(db.Scout, { foreignKey: 'scoutId', as: 'scout' });
+db.Player.hasMany(db.Transaction, { foreignKey: 'playerId', as: 'transactions' });
+db.Transaction.belongsTo(db.Player, { foreignKey: 'playerId', as: 'player' });
 
 
 

@@ -11,9 +11,13 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
       },
-      nationality: {
+      gender:{
+        type: Sequelize.ENUM('male', 'female'),
+        allowNull:false
+      },
+      nationality:{
         type: Sequelize.STRING,
-        allowNull:false,
+        allowNull:false
       },
       phoneNumber: {
         type: Sequelize.STRING,
@@ -28,7 +32,7 @@ module.exports = {
         allowNull:false
       },
       scoutingRole: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('video scout','talent scout', 'technical scout', 'internationl scout', 'first team scout'), 
         allowNull:false
       },
       league: {
@@ -36,14 +40,10 @@ module.exports = {
         allowNull:false
       },
       preferredPosition: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('GK','DEF','MF','ST'),
         allowNull:false
       },
       age: {
-        type: Sequelize.STRING,
-        allowNull:false
-      },
-      socialMediaProfile: {
         type: Sequelize.STRING,
         allowNull:false
       },

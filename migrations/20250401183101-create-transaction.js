@@ -4,8 +4,16 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
+      },
+      playerId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+      },
+      scoutId: {
+        type: Sequelize.UUID,
+        allowNull: true,
       },
       email: {
         type: Sequelize.STRING,
@@ -32,6 +40,10 @@ module.exports = {
       paymentDate: {
         type: Sequelize.STRING,
         allowNull:false
+      },
+      upgradeToPremium:{
+        type: Sequelize.STRING,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

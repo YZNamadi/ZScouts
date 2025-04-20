@@ -18,53 +18,58 @@ const router = require('express').Router();
  * @swagger
  * /api/v1/scoutkyc/{id}:
  *   post:
- *     summary: Submit scout KYC information
+ *     summary: Submit Scout KYC information
  *     tags: [Scout KYC]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: UUID of the scout
  *         schema:
  *           type: string
- *         description: Scout ID to associate with the KYC information
+ *           format: uuid
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - gender
+ *               - nationality
+ *               - phoneNumber
+ *               - verificationDocument
+ *               - clubName
+ *               - scoutingRole
+ *               - league
+ *               - preferredPosition
+ *               - age
  *             properties:
+ *               gender:
+ *                 type: string
+ *                 enum: [male, female]
  *               nationality:
  *                 type: string
- *                 description: Nationality of the scout
  *               phoneNumber:
  *                 type: string
- *                 description: Contact phone number of the scout
- *               clubName:
- *                 type: string
- *                 description: Name of the club the scout is associated with
- *               scoutingRole:
- *                 type: string
- *                 description: Role of the scout (e.g., Senior Scout, Assistant Scout)
- *               league:
- *                 type: string
- *                 description: The league the scout primarily works with
- *               preferredPosition:
- *                 type: string
- *                 description: Preferred position the scout specializes in
- *               age:
- *                 type: string
- *                 description: Preferred age group the scout specializes in
- *               socialMediaProfile:
- *                 type: string
- *                 description: URL of the scout's social media profile
  *               verificationDocument:
  *                 type: string
  *                 format: binary
- *                 description: Upload a verification document (e.g., document or media file)
+ *               clubName:
+ *                 type: string
+ *               scoutingRole:
+ *                 type: string
+ *                 enum: [video scout, talent scout, technical scout, internationl scout, first team scout]
+ *               league:
+ *                 type: string
+ *               preferredPosition:
+ *                 type: string
+ *                 enum: [GK, DEF, MF, ST]
+ *               age:
+ *                 type: string
  *     responses:
  *       201:
- *         description: KYC information submitted successfully
+ *         description: KYC completed successfully
  *         content:
  *           application/json:
  *             schema:
@@ -72,36 +77,56 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "KYC completed successfully"
+ *                   example: KYC completed successfully
  *                 data:
  *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       description: The ID of the created KYC record
  *       400:
- *         description: Missing or incorrect information in the request
+ *         description: Bad Request (missing fields, upload errors, or already completed KYC)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout KYC already captured
  *       404:
  *         description: Scout not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Scout not found
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to complete KYC: [error details]"
  */
-
 router.post('/scoutkyc/:id', upload.single('verificationDocument'), scoutInfo);
 
 /**
  * @swagger
  * /api/v1/scouts/{id}:
  *   put:
- *     summary: Update scout KYC information
+ *     summary: Update scout profile information
  *     tags: [Scout KYC]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: UUID of the scout
  *         schema:
  *           type: string
- *         description: ID of the scout to update
+ *           format: uuid
  *     requestBody:
  *       required: true
  *       content:
@@ -117,10 +142,12 @@ router.post('/scoutkyc/:id', upload.single('verificationDocument'), scoutInfo);
  *                 type: string
  *               scoutingRole:
  *                 type: string
+ *                 enum: [video scout, talent scout, technical scout, internationl scout, first team scout]
  *               league:
  *                 type: string
  *               preferredPosition:
  *                 type: string
+ *                 enum: [GK, DEF, MF, ST]
  *               preferredAge:
  *                 type: string
  *               socialMediaProfile:
@@ -128,7 +155,6 @@ router.post('/scoutkyc/:id', upload.single('verificationDocument'), scoutInfo);
  *               verificationDocument:
  *                 type: string
  *                 format: binary
- *                 description: Optional document for scout verification
  *     responses:
  *       200:
  *         description: Scout profile updated successfully
@@ -142,13 +168,36 @@ router.post('/scoutkyc/:id', upload.single('verificationDocument'), scoutInfo);
  *                   example: Scout profile updated successfully
  *                 data:
  *                   type: object
- *                   description: Updated scout KYC data
  *       400:
- *         description: Error uploading document or invalid input
+ *         description: Bad request (e.g., upload error)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error uploading document: error details"
  *       404:
  *         description: Scout or profile not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Scout profile not found. Please create a profile first."
  *       500:
- *         description: Internal server error while updating profile
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to update scout profile: error details"
  */
 router.put('/scouts/:id', upload.single('verificationDocument'),updateScoutInfo);
 
@@ -205,7 +254,7 @@ router.delete('/scoutkyc/:id/', deleteScoutInfo);
  *     summary: Upload scout profile picture
  *     description: Uploads a profile picture for a specific scout using their ID. Requires a multipart/form-data request with an image file.
  *     tags:
- *       - Scouts
+ *       [Scout KYC]
  *     parameters:
  *       - in: path
  *         name: id

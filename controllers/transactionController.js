@@ -1,105 +1,122 @@
 'use strict';
+
 require('dotenv').config();
 const { Transaction } = require('../models');
 const axios = require('axios');
+const otpGenerator = require('otp-generator');
+const { Scout, Player } = require('../models');
+const SECRET_KEY = process.env.KORA_SECRET_KEY;
 
-// Use a proper Date object (not a string)
-const getFormattedDate = () => new Date();
 
 exports.initializePayment = async (req, res) => {
   try {
-    const { email, name, amount } = req.body;
+    const { userId, role } = req.user; 
+    const otp = otpGenerator.generate(12, { specialChars: false });
+    const ref = `TCA-AF-${otp}`;
+    const formattedDate = new Date().toLocaleString();
+  
+    const normalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
-    if (!email || !name || !amount) {
-      return res.status(400).json({ message: "All fields are required" });
+    let user;
+    
+    if (normalizedRole === 'Scout') {
+      user = await Scout.findByPk(userId);
+    } else if (normalizedRole === 'Player') {
+      user = await Player.findByPk(userId);
+    } else {
+      return res.status(400).json({ message: 'Invalid role' });  
     }
 
-    const reference = `TCA-AF-${Date.now()}`;
-    const paymentData = {
-      amount,
-      customer: {
-        name,
-        email,
-      },
-      currency: "NGN",
-      reference,
-    };
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
 
-    const response = await axios.post(
-      'https://api.korapay.com/merchant/api/v1/charges/initialize',
-      paymentData,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.KORA_SECRET_KEY}`,
+    let paymentData;
+    if (normalizedRole === 'Player') {
+      paymentData = {
+        amount: 3000,
+        customer: {
+          name: user.fullname,
+          email: user.email,
         },
-      }
-    );
+        currency: 'NGN',
+        reference: ref,
+      };
+    } else {
+      paymentData = {
+        amount: 15000,
+        customer: {
+          name: user.fullname,
+          email: user.email,
+        },
+        currency: 'NGN',
+        reference: ref,
+      };
+    }
 
-    const { data } = response?.data;
+    const response = await axios.post('https://api.korapay.com/merchant/api/v1/charges/initialize', paymentData, {
+      headers: {
+        Authorization: `Bearer ${SECRET_KEY}`,
+      },
+    });
 
-    // Save to Sequelize database
-    const payment = await Transaction.create({
-      email,
-      name,
-      amount,
-      reference,
-      paymentDate: getFormattedDate().toLocaleString()
+    const { data } = response?.data; 
+    console.log('Korapay Response:', data);  
 
+    // Create a new transaction record
+    await Transaction.create({
+      scoutId: normalizedRole === 'Scout' ? user.id : null,
+      playerId: normalizedRole === 'Player' ? user.id : null,
+      name: user.fullname,
+      email: user.email,
+      amount: paymentData.amount,
+      reference: paymentData.reference,
+      paymentDate: formattedDate,
     });
 
     res.status(200).json({
-      message: "Payment initialized successfully",
+      message: 'Payment Initialized Successfully',
       data: {
         reference: data?.reference,
         checkout_url: data?.checkout_url,
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.log(error.message);
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
 exports.verifyPayment = async (req, res) => {
   try {
     const { reference } = req.query;
+    const transaction = await Transaction.findOne({ where: { reference: reference } });
 
-    if (!reference) {
-      return res.status(400).json({ message: "Reference is required" });
-    }
+    const response = await axios.get(`https://api.korapay.com/merchant/api/v1/charges/${reference}`, {
+      headers: { Authorization: `Bearer ${SECRET_KEY}` },
+    });
 
-    const response = await axios.get(
-      `https://api.korapay.com/merchant/api/v1/charges/${reference}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.KORA_SECRET_KEY}`,
-        },
-      }
-    );
+    const { data } = response;
 
-    const { data } = response?.data;
-
-    const payment = await Transaction.findOne({ where: { reference } });
-
-    if (!payment) {
-      return res.status(404).json({ message: "Payment record not found" });
-    }
-
-    if (data.status === "success") {
-      payment.status = "success";
-      await payment.save();
-      return res.status(200).json({
-        message: "Payment Verified Successfully",
-        data: payment,
-      });
+    if (data?.status && data?.data?.status === 'success') {
+      await Transaction.update(
+        { status: 'success', upgradeToPremium: true },
+        { where: { id: transaction.id } }
+      );
+      return res.status(200).json({ message: 'Payment Verified Successfully' });
     } else {
-      return res.status(400).json({
-        message: "Payment Verification Failed",
-        data: payment,
-      });
+      await Transaction.update(
+        { status: 'failed', upgradeToPremium: false },
+        { where: { id: transaction.id } }
+      );
+      return res.status(400).json({ message: 'Payment Verification Failed' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.log(error);
+    res.status(500).json({
+      message: error,
+    });
   }
 };

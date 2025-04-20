@@ -8,8 +8,8 @@ const fs = require('fs')
 exports.scoutInfo = async(req, res) => {
     try {
         const {id} = req.params;
-        const {nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
-            age, socialMediaProfile} = req.body;
+        const { gender, nationality, phoneNumber, clubName, scoutingRole, league, preferredPosition,
+            age} = req.body;
 
         if (!req.file) {
             return res.status(400).json({
@@ -36,14 +36,17 @@ exports.scoutInfo = async(req, res) => {
         try {
             result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
             fs.unlinkSync(req.file.path);
-        } catch (uploadError) {
+          } catch (uploadError) {
+            console.error("Cloudinary Upload Error:", uploadError); // Log the full error
             fs.unlinkSync(req.file.path);
             return res.status(400).json({
-                message: "Error uploading document: " + uploadError.message
+              message: "Error uploading document: " + (uploadError.message || "Unknown error")
             });
-        }
+          }
+          
 
         const data = {
+            gender,
             nationality, 
             phoneNumber, 
             verificationDocument: result.secure_url,
@@ -52,8 +55,7 @@ exports.scoutInfo = async(req, res) => {
             league,
             preferredPosition,
             age,
-            socialMediaProfile,
-            scoutId
+            scoutId: id
         };
         const scoutDetails = await ScoutKyc.create(data);
         
@@ -78,7 +80,6 @@ exports.scoutInfo = async(req, res) => {
         });
     }
 };
-
 
 exports.updateScoutInfo = async(req, res) => {
     try {
