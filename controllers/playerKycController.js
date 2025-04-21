@@ -2,6 +2,7 @@
 
 const {Player} = require('../models');
 const {PlayerKyc} = require('../models');
+const {Video} = require('../models');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs')
 
@@ -317,8 +318,19 @@ exports.videoUpload = async (req, res) => {
     }
 
     const { id } = req.params;
-    const player = await PlayerKyc.findOne({ where: { id: id } });
+    const playerKyc = await PlayerKyc.findOne({ where: { id: id } });
 
+    if (!playerKyc) {
+      
+      if (req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(404).json({
+        message: "Complete your KYC"
+      });
+    }
+    const player = await Player.findOne({ where: { id: PlayerKyc.playerId } });
+    
     if (!player) {
       
       if (req.file.path && fs.existsSync(req.file.path)) {
@@ -328,21 +340,16 @@ exports.videoUpload = async (req, res) => {
         message: "Player not found"
       });
     }
-
     const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'video' });
 
     if (req.file.path && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
 
-    player.videoUpload = result.secure_url;
-    await player.save();
-
+       const video = await Video.create({playerId: playerKyc.playerId, videoUpload: result.secure_url} )
     res.status(200).json({
       message: "Video successfully uploaded",
-      data: {
-        videoUpload: result.secure_url
-      }
+      data: video
     });
 
   } catch (error) {

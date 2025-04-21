@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config();
-const { Player, PlayerKyc, Scout} = require('../models');
+const { Player, PlayerKyc, Scout, Video, Rating} = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -10,6 +10,7 @@ const {reset} = require('../utils/mailTemplates');
 const  {verify}  = require('../utils/mailTemplates');
 const {resendVerifyEmail} = require('../utils/mailTemplates');
 const { Op } = require("sequelize");
+const player = require('../models/player');
 
 
 
@@ -67,7 +68,7 @@ const signUp = async (req, res) => {
       isVerified: false
     });
 
-    const verificationLink =`https://z-scoutsf.vercel.app/email_verify_player/${token}`;
+    const verificationLink =`${req.protocol}://${req.get("host")}/api/players/verify-email/${token}`;
     const firstName =player.fullname.split(" ")[0];
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
@@ -364,7 +365,7 @@ const getPlayer = async (req, res) => {
 
     const findPlayer = await Player.findOne({
       where: { id },
-      include: [{ model: PlayerKyc, as: 'playerKyc' }]
+      include: [{ model: PlayerKyc, as: 'playerKyc', }, { model: Rating, as: 'ratings', }]
     });
     
     if(!findPlayer){
@@ -449,23 +450,22 @@ const getAllVideosByPlayer = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const player = await Player.findOne({ where: { id } });
+    const player = await Player.findByPk(id);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
 
-    const playerKyc = await PlayerKyc.findAll({
-      where: { playerId: id },
-      attributes: ['media']
+    const playerVideos = await Video.findAll({
+      where: { playerId: id }
     });
 
-    if (!playerKyc) {
+    if (!playerVideos) {
       return res.status(404).json({ message: "Player Videos not found" });
     }
 
     res.status(200).json({
       message: `All of video of player`,
-      data: playerKyc
+      data: playerVideos
     });
 
   } catch (error) {
@@ -505,8 +505,7 @@ const getOneVideoOfPlayer = async (req, res) => {
 
 const getAllPLayers =async (req,res)=>{
   try {
-      const allPLayers = await Player.findAll();
-
+      const allPLayers = await Player.findAll({include: [{ model: PlayerKyc, as: 'playerKyc' }]});
       res.status(200).json({
         message:"All PLayers in Database",
         data:allPLayers,
