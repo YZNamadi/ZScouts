@@ -448,9 +448,12 @@ const footSearch = async (req, res) => {
 
 const getAllVideosByPlayer = async (req, res) => {
   try {
+    console.log("Here");
+    
     const { id } = req.params;
-
+    
     const player = await Player.findByPk(id);
+    console.log("Player:", player);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
@@ -469,6 +472,7 @@ const getAllVideosByPlayer = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error.message)
     console.error(error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -498,6 +502,7 @@ const getOneVideoOfPlayer = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error.message)
     console.error(error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }

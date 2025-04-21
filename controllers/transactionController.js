@@ -73,7 +73,7 @@ exports.initializePayment = async (req, res) => {
       reference: paymentData.reference,
       paymentDate: formattedDate,
     });
-
+    console.log(SECRET_KEY)
     res.status(200).json({
       message: 'Payment Initialized Successfully',
       data: {

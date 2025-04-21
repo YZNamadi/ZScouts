@@ -318,7 +318,7 @@ exports.videoUpload = async (req, res) => {
     }
 
     const { id } = req.params;
-    const playerKyc = await PlayerKyc.findOne({ where: { id: id } });
+    const playerKyc = await PlayerKyc.findByPk(id);
 
     if (!playerKyc) {
       
@@ -329,7 +329,8 @@ exports.videoUpload = async (req, res) => {
         message: "Complete your KYC"
       });
     }
-    const player = await Player.findOne({ where: { id: PlayerKyc.playerId } });
+    
+    const player = await Player.findOne({ where: { id: playerKyc.playerId } });
     
     if (!player) {
       
@@ -353,6 +354,7 @@ exports.videoUpload = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error.message)
     console.error("Video Upload Error:", error.message);
 
   
