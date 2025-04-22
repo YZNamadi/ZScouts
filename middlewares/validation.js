@@ -61,13 +61,13 @@ exports.forgetPasswords = (req, res, next) => {
     const schema = Joi.object({
         email: Joi.string()
             .email()
-            .pattern(/^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/)
             .required()
+            .pattern(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
             .messages({
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email cannot be empty',
                 'any.required': 'Email is required',
-                'string.pattern.base': 'Invalid email. Use a valid Gmail address with at least 6 characters before @gmail.com (e.g., johndoe@gmail.com). Only lowercase letters, numbers, and optional dots are allowed.'
+               
             })
     });
 
