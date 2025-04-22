@@ -34,15 +34,17 @@ exports.initializePayment = async (req, res) => {
     }
 
     let paymentData;
+    console.log('User Role:', normalizedRole);
+    console.log('User Details:', user);
     if (normalizedRole === 'Player') {
       paymentData = {
         amount: 3000,
+        currency: 'NGN',
+        reference: ref,
         customer: {
           name: user.fullname,
           email: user.email,
         },
-        currency: 'NGN',
-        reference: ref,
       };
       console.log('Player Payment Data:', paymentData);
     } else {
