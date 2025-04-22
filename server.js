@@ -12,7 +12,7 @@ const transactionRoutes = require("./routes/transactionRoutes");
 const scoutKycRoutes = require("./routes/scoutKycRouter");
 const playerKycRoutes = require("./routes/playerKycRoutes");
 const ratingRoutes = require('./routes/ratingRoutes');
-const adminRoutes = require('./routes/adminRoutes'); 
+const adminRoutes = require('./routes/adminRoutes');
 
 const PORT = process.env.PORT;
 const app = express();
@@ -20,8 +20,25 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
+// ✅ Secure CORS setup with fallback for Postman/local dev
+const allowedOrigins = [
+  "https://zscouts.onrender.com",       // Swagger (hosted)
+  "https://z-scoutsf.vercel.app",       // Frontend (hosted)
+];
 
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    console.log("Incoming request from origin:", origin);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS policy: Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
 
 // Routes
 app.use('/api/players', playerRoutes);
@@ -30,9 +47,9 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/v1', playerKycRoutes);
 app.use('/api/v1', scoutKycRoutes);
 app.use('/api', ratingRoutes);
-app.use('/api/admin', adminRoutes); 
+app.use('/api/admin', adminRoutes);
 
-// Swagger configuration
+// Swagger config
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -73,7 +90,7 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Root
+// Root route
 app.get('/', (req, res) => {
   res.send('ZScouts API is running!');
 });
@@ -86,7 +103,7 @@ app.use((error, req, res, next) => {
   next();
 });
 
-// Start server and sync DB
+// Sync DB and start server
 const server = async () => {
   try {
     await sequelize.authenticate();
