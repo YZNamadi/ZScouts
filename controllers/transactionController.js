@@ -5,11 +5,13 @@ const { Transaction } = require('../models');
 const axios = require('axios');
 const otpGenerator = require('otp-generator');
 const { Scout, Player } = require('../models');
-const SECRET_KEY = process.env.KORA_SECRET_KEY;
 
 
 exports.initializePayment = async (req, res) => {
   try {
+    const SECRET_KEY = process.env.KORA_SECRET_KEY;
+    console.log("Process Value: ",process.env.KORA_SECRET_KEY);
+    console.log("Secret Value: ",SECRET_KEY);
     const { userId, role } = req.user; 
     const otp = otpGenerator.generate(12, { specialChars: false });
     const ref = `TCA-AF-${otp}`;
@@ -62,7 +64,7 @@ exports.initializePayment = async (req, res) => {
 
     const { data } = response?.data; 
     console.log('Korapay Response:', data);  
-
+    
     // Create a new transaction record
     await Transaction.create({
       scoutId: normalizedRole === 'Scout' ? user.id : null,
@@ -91,6 +93,7 @@ exports.initializePayment = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   try {
+    const SECRET_KEY = process.env.KORA_SECRET_KEY;
     const { reference } = req.query;
     const transaction = await Transaction.findOne({ where: { reference: reference } });
 
