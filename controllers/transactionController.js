@@ -9,8 +9,8 @@ const { Scout, Player } = require('../models');
 
 exports.initializePayment = async (req, res) => {
   try {
-    const SECRET_KEY = process.env.KORA_SECRET_KEY;
-    console.log("Process Value: ",process.env.KORA_SECRET_KEY);
+    const SECRET_KEY = process.env.KORA_SECRET_KEY1;
+    console.log("Process Value: ",process.env.KORA_SECRET_KEY1);
     console.log("Secret Value: ",SECRET_KEY);
     const { userId, role } = req.user; 
     const otp = otpGenerator.generate(12, { specialChars: false });
@@ -97,7 +97,7 @@ console.log('Kora:',paymentData)
 
 exports.verifyPayment = async (req, res) => {
   try {
-    const SECRET_KEY = process.env.KORA_SECRET_KEY;
+    const SECRET_KEY = process.env.KORA_SECRET_KEY1;
     const { reference } = req.query;
     const transaction = await Transaction.findOne({ where: { reference: reference } });
 
