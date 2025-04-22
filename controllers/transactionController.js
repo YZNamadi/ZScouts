@@ -44,6 +44,7 @@ exports.initializePayment = async (req, res) => {
         currency: 'NGN',
         reference: ref,
       };
+      console.log('Player Payment Data:', paymentData);
     } else {
       paymentData = {
         amount: 15000,
@@ -54,8 +55,9 @@ exports.initializePayment = async (req, res) => {
         currency: 'NGN',
         reference: ref,
       };
+      console.log('Scout Payment Data:', paymentData);
     }
-
+console.log('Kora:',paymentData)
     const response = await axios.post('https://api.korapay.com/merchant/api/v1/charges/initialize', paymentData, {
       headers: {
         Authorization: `Bearer ${SECRET_KEY}`,
