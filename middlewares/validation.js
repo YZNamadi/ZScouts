@@ -22,8 +22,8 @@ exports.registerValidation = (req, res, next) => {
             .messages({
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email cannot be empty',
-                'any.required': 'Email is required',
-                'string.pattern.base': 'Invalid email. Use a valid Gmail address with at least 6 characters before @gmail.com (e.g., johndoe@gmail.com). Only lowercase letters, numbers, and optional dots are allowed.'
+                'any.required': 'Email is required'
+                
             }),
 
         password: Joi.string()
@@ -62,7 +62,7 @@ exports.forgetPasswords = (req, res, next) => {
         email: Joi.string()
             .email()
             .required()
-            .pattern(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+            
             .messages({
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email cannot be empty',
@@ -118,7 +118,7 @@ exports.loginValidation = (req, res, next) => {
 exports.resetPasswordValidation = (req, res, next) => {
     const schema = Joi.object({
         newPassword: Joi.string()
-            .pattern(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+            
             .trim()
             .required()
             .messages({
