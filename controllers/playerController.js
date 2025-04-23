@@ -537,20 +537,38 @@ const getOneVideoOfPlayer = async (req, res) => {
   }
 };
 
-const getAllPLayers =async (req,res)=>{
+const getAllPLayers = async (req, res) => {
   try {
-      const allPLayers = await Player.findAll({include: [{ model: PlayerKyc, as: 'playerKyc' }, { model: Rating, as: 'ratings', }]});
-      res.status(200).json({
-        message:"All PLayers in Database",
-        data:allPLayers,
-        total:allPLayers.length
-      })
+    const scoutId = req.user.id; // or from req.params depending on how you're sending it
+
+    const ratings = await Rating.findAll({
+      where: { scoutId },
+      include: [
+        {
+          model: Player,
+          as: 'player',
+          include: [
+            { model: PlayerKyc, as: 'playerKyc' },
+            { model: Rating, as: 'ratings' } // optional if you want all ratings for each player
+          ]
+        }
+      ]
+    });
+
+    // Extract just the players
+    const ratedPlayers = ratings.map(rating => rating.player);
+
+    res.status(200).json({
+      message: 'Players rated by this scout',
+      data: ratedPlayers,
+      total: ratedPlayers.length
+    });
+
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
-
 
 
 
