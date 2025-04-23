@@ -326,38 +326,67 @@ const signOut = async (req, res) => {
 
 const getPlayerContact = async (req, res) => {
   try {
-    const { id: playerId } = req.params;
-    const scoutEmail = req.user.email;
+    const { playerId } = req.params;
+    const requestingPlayerId = req.user.id;
 
-    const player = await Player.findByPk(playerId);
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
-    }
-
-    const transaction = await transaction.findOne({
+    // Check if the player has paid
+    const transaction = await Transaction.findOne({
       where: {
-        email: scoutEmail,
-        status: "successful"
-      }
+        playerId: requestingPlayerId,
+        contactedPlayerId: playerId,
+        status: 'completed',
+      },
     });
 
     if (!transaction) {
-      return res.status(403).json({ message: "You must complete the payment to access player contact details." });
+      return res.status(403).json({
+        success: false,
+        message: 'You must pay before accessing this player’s contact details.',
+      });
     }
 
-    return res.status(200).json({
-      message: "Player contact details retrieved successfully.",
-      data: {
-        fullName: player.fullName,
+    // Get player details and ratings
+    const player = await Player.findByPk(playerId, {
+      attributes: ['email', 'phone', 'address'],
+      include: [
+        {
+          model: Rating,
+          attributes: ['score'],
+        },
+      ],
+    });
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: 'Player not found.',
+      });
+    }
+
+    // Calculate average rating
+    const ratings = player.Ratings || [];
+    const totalScore = ratings.reduce((sum, r) => sum + r.score, 0);
+    const averageRating = ratings.length > 0 ? (totalScore / ratings.length).toFixed(1) : 'No ratings yet';
+
+    res.status(200).json({
+      success: true,
+      message: 'Player contact retrieved successfully.',
+      contact: {
         email: player.email,
-        phoneNumber: player.phoneNumber
-      }
+        phone: player.phone,
+        address: player.address,
+      },
+      averageRating,
     });
   } catch (error) {
-    console.error("Error retrieving player contact:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching player contact:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error.',
+    });
   }
 };
+
 
 const getPlayer = async (req, res) => {
   try {

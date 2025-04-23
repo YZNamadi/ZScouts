@@ -23,14 +23,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    profileCompletion:{
+    profileCompletion: {
       type: DataTypes.BOOLEAN,
-      defaultValue:false,
+      defaultValue: false,
     },
   }, {
     tableName: 'Players',
     timestamps: true,
   });
+
+  // 👇 Add this to define associations
+  Player.associate = (models) => {
+    Player.hasMany(models.Rating, { foreignKey: 'playerId', as: 'ratings' });
+    Player.hasOne(models.PlayerKyc, { foreignKey: 'playerId', as: 'playerKyc' });
+  };
 
   return Player;
 };
