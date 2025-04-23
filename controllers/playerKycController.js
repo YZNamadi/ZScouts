@@ -30,14 +30,8 @@ exports.playerInfo = async (req, res) => {
         } = req.body;
         console.log('Received KYC data:', req.body)
 
-        if (!req.file) {
-            return res.status(400).json({
-                message: "Please upload a short video showing your skills"
-            });
-        }
         const player = await Player.findByPk(id);
         if (!player) {
-            fs.unlinkSync(req.file.path);
             return res.status(404).json({
                 message: "Player not found"
             });
@@ -45,27 +39,25 @@ exports.playerInfo = async (req, res) => {
 
         const existingKyc = await PlayerKyc.findOne({ where: { id: id} });
         if (existingKyc || player.profileCompletion) {
-            fs.unlinkSync(req.file.path);
             return res.status(400).json({
                 message: "Player KYC already captured"
             });
         }
 
-        let cloudinaryResult;
-        try {
-            cloudinaryResult = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
-            fs.unlinkSync(req.file.path); 
-        } catch (uploadError) {
-            fs.unlinkSync(req.file.path);
-            return res.status(400).json({
-                message: `Error uploading video: ${uploadError.message}`
-            });
-        }
+        // let cloudinaryResult;
+        // try {
+        //     cloudinaryResult = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
+        //     fs.unlinkSync(req.file.path); 
+        // } catch (uploadError) {
+        //     fs.unlinkSync(req.file.path);
+        //     return res.status(400).json({
+        //         message: `Error uploading video: ${uploadError.message}`
+        //     });
+        // }
 
         const playerKycData = {
     age,gender,nationality,height,weight,preferredFoot,phoneNumber,homeAddress,primaryPosition,secondaryPosition,
-    currentClub,ability, contactInfoOfCoaches,openToTrials,followDiet,willingToRelocate,media: cloudinaryResult.secure_url,
-      playerId: id
+    currentClub,ability, contactInfoOfCoaches,openToTrials,followDiet,willingToRelocate,playerId: id
         };
 
         const playerDetails = await PlayerKyc.create(playerKycData);

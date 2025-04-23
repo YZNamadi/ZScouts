@@ -93,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     videoUpload:{
       type: DataTypes.STRING,
-      allowoNull:false
+      allowoNull:true
     },
   }, {
     tableName: 'PlayerKycs',

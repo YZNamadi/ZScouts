@@ -88,7 +88,7 @@ module.exports = {
       },
       videoUpload:{
         type: Sequelize.STRING,
-        allowoNull:false
+        allowoNull:true
       },
       createdAt: {
         allowNull: false,

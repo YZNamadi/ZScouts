@@ -510,7 +510,7 @@ const getOneVideoOfPlayer = async (req, res) => {
 
 const getAllPLayers =async (req,res)=>{
   try {
-      const allPLayers = await Player.findAll({include: [{ model: PlayerKyc, as: 'playerKyc' }]});
+      const allPLayers = await Player.findAll({include: [{ model: PlayerKyc, as: 'playerKyc' }, { model: Rating, as: 'ratings', }]});
       res.status(200).json({
         message:"All PLayers in Database",
         data:allPLayers,
