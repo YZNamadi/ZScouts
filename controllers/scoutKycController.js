@@ -207,41 +207,46 @@ exports.deleteScoutInfo = async(req, res) => {
     }
 };
 
+
+
 exports.profilePic = async (req, res) => {
-    try {
-      const { id} = req.params;
-  
-      const scout = await Scout.findByPk(id);
-      if (!scout) {
-        if (req.file.path) {
-          fs.unlinkSync(req.file.path); 
-        }
-        return res.status(404).json({
-          message: "Scout not found"
-        });
-      }
-  
-      const result = await cloudinary.uploader.upload(req.file.path, {resource_type: 'image'});
-  
-      fs.unlinkSync(req.file.path); 
-  
-      scout.profilePic = result.secure_url;
-      await scout.save();
-  
-      res.status(200).json({
-        message: "Profile picture successfully uploaded",
-        data: {
-          profilePic: result.secure_url
-        }
-      });
-  
-    } catch (error) {
-      console.error("Profile Pic Upload Error:", error.message);
-      res.status(500).json({
-        message: "Unable to upload scout profile picture: " + error.message
-      });
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
     }
-  };
+
+    const scout = await Scout.findByPk(id);
+    if (!scout) {
+      await fs.unlink(req.file.path);
+      return res.status(404).json({ message: "Scout not found" });
+    }
+
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      resource_type: 'image',
+      folder: 'scouts/profilePics',
+      transformation: [{ width: 400, height: 400, crop: "limit" }]
+    });
+
+    await fs.unlink(req.file.path); // Non-blocking delete
+
+    scout.profilePic = result.secure_url;
+    await scout.save();
+
+    res.status(200).json({
+      message: "Profile picture successfully uploaded",
+      data: { profilePic: result.secure_url }
+    });
+
+  } catch (error) {
+    console.error("Profile Pic Upload Error:", error.message);
+    res.status(500).json({
+      message: "Unable to upload scout profile picture: " + error.message
+    });
+  }
+};
+
   
   exports.deleteScoutProfilePic = async (req, res) => {
     try {
