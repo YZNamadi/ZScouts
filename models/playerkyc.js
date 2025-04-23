@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     media: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull:true
     },
     openToTrials:{
       type: DataTypes.ENUM('YES','NO'),
@@ -93,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     videoUpload:{
       type: DataTypes.STRING,
-      allowoNull:true
+      allowoNull:false,
     },
   }, {
     tableName: 'PlayerKycs',

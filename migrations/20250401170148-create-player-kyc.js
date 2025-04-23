@@ -68,7 +68,7 @@ module.exports = {
       },
       media: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull:true
       },
       openToTrials: {
         type: Sequelize.ENUM('YES','NO'),
