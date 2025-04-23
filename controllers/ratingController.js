@@ -31,36 +31,40 @@ const ratePlayer = async (req, res) => {
     // 2) player must exist
     const player = await findPlayer(playerId);
 
-    // 3) prevent same scout from rating twice
-    const existing = await Rating.findOne({ where: { playerId, scoutId } });
-    if (existing) {
-      return res.status(400).json({ message: 'You have already rated this player' });
-    }
+    // 3) handle existing rating: update instead of reject
+let newRating;
+const existing = await Rating.findOne({ where: { playerId, scoutId } });
+if (existing) {
+  existing.ratingScore = rating;
+  existing.comment     = comment || null;
+  await existing.save();
+  newRating = existing;
+} else {
+  // 4) create the rating
+  newRating = await Rating.create({
+    playerId,
+    scoutId,
+    ratingScore: rating,
+    comment:     comment || null,
+  });
+}
 
-    // 4) create the rating
-    const newRating = await Rating.create({
-      playerId,
-      scoutId,
-      ratingScore: rating,
-      comment: comment || null,
-    });
+// 5) recalc and save averages on player
+const allRatings = await Rating.findAll({ where: { playerId } });
+const totalCount = allRatings.length;
+const totalScore = allRatings.reduce((sum, r) => sum + r.ratingScore, 0);
+player.averageRating    = totalScore / totalCount;
+player.totalRatingCount = totalCount;
+await player.save();
 
-    // 5) recalc and save averages on player
-    const allRatings = await Rating.findAll({ where: { playerId } });
-    const totalCount = allRatings.length;
-    const totalScore = allRatings.reduce((sum, r) => sum + r.ratingScore, 0);
+// 6) return the updated rating + stats
+return res.status(200).json({
+  message:           existing ? 'Rating updated successfully' : 'Rating submitted successfully',
+  rating:            newRating,
+  averageRating:     player.averageRating,
+  totalRatingCount:  player.totalRatingCount,
+});
 
-    player.averageRating    = totalScore / totalCount;
-    player.totalRatingCount = totalCount;
-    await player.save();
-
-    // 6) return new rating + updated stats so frontend can refresh immediately
-    return res.status(201).json({
-      message: 'Rating submitted successfully',
-      rating: newRating,
-      averageRating:    player.averageRating,
-      totalRatingCount: player.totalRatingCount,
-    });
   } catch (err) {
     console.error('Error while rating player:', err);
     if (err.status === 404) {
