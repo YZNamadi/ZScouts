@@ -1,60 +1,71 @@
+// controllers/ratingController.js
 'use strict';
 const { Rating, Player } = require('../models');
 
-// Helper function to find a player by ID
+// Helper to load player or throw a 404
 const findPlayer = async (playerId) => {
   const player = await Player.findByPk(playerId);
   if (!player) {
-    throw new Error('Player not found');
+    const err = new Error('Player not found');
+    err.status = 404;
+    throw err;
   }
   return player;
 };
 
-// Rate a player
 const ratePlayer = async (req, res) => {
   try {
     const { id: playerId } = req.params;
     const { ratingScore, comment } = req.body;
-    const scoutId = req.user.id; // Assuming scout's ID is stored in req.user
+    const scoutId = req.user.id;
 
-    // Ensure ratingScore is an integer
+    // 1) ratingScore must exist, be int, between 1–5
+    if (ratingScore === undefined) {
+      return res.status(400).json({ message: 'ratingScore is required' });
+    }
     const rating = parseInt(ratingScore, 10);
-
-    // Validate if player exists
-    const player = await findPlayer(playerId);
-
-    // Rating score validation (between 1 and 5)
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({ message: 'Rating score must be between 1 and 5' });
+    if (isNaN(rating) || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'ratingScore must be an integer between 1 and 5' });
     }
 
-    // Prevent duplicate ratings by the same scout for the same player
-    const existingRating = await Rating.findOne({ where: { playerId, scoutId } });
-    if (existingRating) {
+    // 2) player must exist
+    const player = await findPlayer(playerId);
+
+    // 3) prevent same scout from rating twice
+    const existing = await Rating.findOne({ where: { playerId, scoutId } });
+    if (existing) {
       return res.status(400).json({ message: 'You have already rated this player' });
     }
 
-    // Save the rating
-    await Rating.create({ playerId, scoutId, ratingScore: rating, comment });
+    // 4) create the rating
+    const newRating = await Rating.create({
+      playerId,
+      scoutId,
+      ratingScore: rating,
+      comment: comment || null,
+    });
 
-    // Update player's average rating
+    // 5) recalc and save averages on player
     const allRatings = await Rating.findAll({ where: { playerId } });
-    const totalScore = allRatings.reduce((sum, rating) => sum + rating.ratingScore, 0);
     const totalCount = allRatings.length;
-    player.averageRating = totalScore / totalCount;
+    const totalScore = allRatings.reduce((sum, r) => sum + r.ratingScore, 0);
+
+    player.averageRating    = totalScore / totalCount;
     player.totalRatingCount = totalCount;
     await player.save();
 
-    return res.status(201).json({ message: 'Rating submitted successfully' });
-  } catch (error) {
-    console.error('Error while rating player:', error.message);
-
-    // If the player is not found
-    if (error.message === 'Player not found') {
-      return res.status(404).json({ message: error.message });
+    // 6) return new rating + updated stats so frontend can refresh immediately
+    return res.status(201).json({
+      message: 'Rating submitted successfully',
+      rating: newRating,
+      averageRating:    player.averageRating,
+      totalRatingCount: player.totalRatingCount,
+    });
+  } catch (err) {
+    console.error('Error while rating player:', err);
+    if (err.status === 404) {
+      return res.status(404).json({ message: err.message });
     }
-
-    // Handle other errors
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

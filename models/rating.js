@@ -1,3 +1,5 @@
+// models/rating.js
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Rating = sequelize.define('Rating', {
     id: {
@@ -10,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Players', // Must match the Player table name
+        model: 'Players',
         key: 'id',
       },
       onDelete: 'CASCADE',
@@ -20,28 +22,34 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Scouts', // Must match the Scout table name
+        model: 'Scouts',
         key: 'id',
       },
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     },
     ratingScore: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
       validate: {
-        min: 1.0,
-        max: 5.0,
+        min: 1,
+        max: 5,
+        isInt: true,
       },
     },
     comment: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   }, {
     tableName: 'Ratings',
     timestamps: true,
   });
+
+  Rating.associate = function(models) {
+    Rating.belongsTo(models.Player, { foreignKey: 'playerId' });
+    Rating.belongsTo(models.Scout, { foreignKey: 'scoutId' });
+  };
 
   return Rating;
 };
