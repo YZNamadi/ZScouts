@@ -20,7 +20,7 @@ const {
   footSearch,
   getAllVideosByPlayer,
   getOneVideoOfPlayer,
-  getAllPLayers
+  getAllPlayers
 } = require("../controllers/playerController");
 
 // Standard player auth routes
@@ -770,7 +770,7 @@ router.get('/oneplayer-vid/:id', getOneVideoOfPlayer);
  *       500:
  *         description: Internal server error
  */
-router.get('/allplayers', getAllPLayers);
+router.get('/allplayers', getAllPlayers);
 
 
 

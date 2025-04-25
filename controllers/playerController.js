@@ -537,25 +537,39 @@ const getOneVideoOfPlayer = async (req, res) => {
   }
 };
 
-const getAllPLayers = async (req, res) => {
+const getAllPlayers = async (req, res) => {
   try {
-    const allPLayers = await Player.findAll({
+    const allPlayers = await Player.findAll({
       include: [
-        { model: PlayerKyc, as: 'playerKyc' },
-        { model: Rating, as: 'ratings' }
+        {
+          model: PlayerKyc,
+          as: 'playerKyc',
+        },
+        {
+          model: Rating,
+          as: 'ratings',
+          include: [
+            {
+              model: Scout,
+              as: 'scout', // Make sure this alias matches your association
+              attributes: ['id', 'fullname', 'email'] // Optional: limits the fields returned
+            }
+          ]
+        }
       ]
     });
 
     res.status(200).json({
-      message: "All PLayers in Database",
-      data: allPLayers,
-      total: allPLayers.length
+      message: "All players in database",
+      data: allPlayers,
+      total: allPlayers.length
     });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 
 module.exports = {
@@ -574,5 +588,5 @@ module.exports = {
   footSearch,
 getAllVideosByPlayer,
 getOneVideoOfPlayer,
-getAllPLayers
+getAllPlayers
 };
